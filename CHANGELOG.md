@@ -9,14 +9,21 @@ All notable changes to this project will be documented in this file.
 - Command ``WifiPower 1`` to restore default wifi power
 - HASPmota `meta` attribute and improved `berry_run`
 
+
 ### Breaking Changed
 
 ### Changed
+- InfluxDb resolves DNS name before request (#18015)
+- Shutter sliders in WEBGUI automatically appear and disappear during configuration and update during movement (#18701)
+- AdafruitFingerprint library from v2.0.4 to v2.1.0
 
 ### Fixed
+- ESP32 InfluxDb initial connection delays using HTTPClient (#18015)
 - Shutter bootloop using more than 4 shutters (#18673)
 - AIThinker webcam issues (#18652)
 - Berry `tasmota.wifi()` would wrongly report wifi as up
+- Inverted shutter now reflect status also in WEBGUI and several minor fixes to make "inverted" consistant (#18701)
+- Matter fix fabric provisioning from CASE session for iOS 16.5
 
 ### Removed
 
