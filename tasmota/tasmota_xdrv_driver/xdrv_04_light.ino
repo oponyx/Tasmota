@@ -50,7 +50,8 @@
  * 10            yes     no         no          Kwanzaa
  * 11            yes     no         no          Rainbow
  * 12            yes     no         no          Fire
- *
+ * 13            yes     no         no          Stairs
+ * 14            yes     no         no          Clear (= Berry)
 \*********************************************************************************************/
 
 /*********************************************************************************************\
@@ -235,6 +236,7 @@ struct LIGHT {
   uint8_t fixed_color_index = 1;
   uint8_t pwm_offset = 0;                 // Offset in color buffer, used by sm16716 to drive itself RGB, and PWM for CCT (value is 0 or 3)
   uint8_t max_scheme = LS_MAX -1;
+  uint8_t last_scheme;
 
   uint32_t wakeup_start_time = 0;
 
@@ -245,7 +247,7 @@ struct LIGHT {
   bool     fade_initialized = false;      // dont't fade at startup
   bool     fade_running = false;
 #ifdef USE_DEVICE_GROUPS
-  uint8_t  last_scheme = 0;
+  uint8_t  last_dgr_scheme = 0;
   bool     devgrp_no_channels_out = false; // don't share channels with device group (e.g. if scheme set by other device)
 #ifdef USE_DGR_LIGHT_SEQUENCE
   uint8_t  sequence_offset = 0;            // number of channel changes this light is behind the master
@@ -1866,16 +1868,18 @@ void LightAnimate(void)
         break;
 #endif
       default:
-          XlgtCall(FUNC_SET_SCHEME);
+        XlgtCall(FUNC_SET_SCHEME);
     }
 
 #ifdef USE_DEVICE_GROUPS
-    if (Settings->light_scheme != Light.last_scheme) {
-      Light.last_scheme = Settings->light_scheme;
+    if (Settings->light_scheme != Light.last_dgr_scheme) {
+      Light.last_dgr_scheme = Settings->light_scheme;
       SendDeviceGroupMessage(Light.device, DGR_MSGTYP_UPDATE, DGR_ITEM_LIGHT_SCHEME, Settings->light_scheme);
       Light.devgrp_no_channels_out = false;
     }
 #endif  // USE_DEVICE_GROUPS
+
+    Light.last_scheme = Settings->light_scheme;
   }
 
   if ((Settings->light_scheme < LS_MAX) || power_off) {  // exclude WS281X Neopixel schemes
@@ -2485,7 +2489,7 @@ void LightHandleDevGroupItem(void)
       break;
     case DGR_ITEM_LIGHT_SCHEME:
       if (Settings->light_scheme != value) {
-        Light.last_scheme = Settings->light_scheme = value;
+        Light.last_dgr_scheme = Settings->light_scheme = value;
         Light.devgrp_no_channels_out = (value != 0);
         send_state = true;
       }
@@ -2858,7 +2862,7 @@ void CmndHsbColor(void)
 
 void CmndScheme(void)
 {
-  // Scheme 0..12  - Select one of schemes 0 to 12
+  // Scheme 0..14  - Select one of schemes 0 to 14
   // Scheme 2      - Select scheme 2
   // Scheme 2,0    - Select scheme 2 with color wheel set to 0 (HSB Red)
   // Scheme +      - Select next scheme
