@@ -17,6 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import matter
+
 # Matter plug-in for core behavior
 
 # dummy declaration for solidification
@@ -30,7 +32,7 @@ class Matter_Plugin_Sensor_Illuminance : Matter_Plugin_Sensor
   static var CLUSTERS  = {
     0x0400: [0,1,2,0xFFFC,0xFFFD],                  # Illuminance Measurement p.95 - no writable
   }
-  static var TYPES = { 0x0106: 2 }                  # Temperature Sensor, rev 2
+  static var TYPES = { 0x0106: 2 }                  # Illuminance Sensor, rev 2
 
   #############################################################
   # Pre-process value
