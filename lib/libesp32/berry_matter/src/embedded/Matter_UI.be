@@ -33,11 +33,11 @@ import matter
 #################################################################################
 class Matter_UI
   static var _CLASSES_TYPES = "|relay|light0|light1|light2|light3|shutter|shutter+tilt"
-                              "|temperature|pressure|illuminance|humidity|occupancy|onoff"
+                              "|temperature|pressure|illuminance|humidity|occupancy|onoff|contact"
   # static var _CLASSES_HTTP  = "-http"
   static var _CLASSES_TYPES2= "|http_relay|http_light0|http_light1|http_light2|http_light3"
                               "|http_temperature|http_pressure|http_illuminance|http_humidity"
-                              "|http_occupancy"
+                              "|http_occupancy|http_contact"
   var device
 
   # ####################################################################################################
@@ -429,7 +429,7 @@ class Matter_UI
                            ">Create new endpoint</button></form>")
 
     # Add remote endpoint
-    webserver.content_send("<hr><p><b>Add Remote Tasmota</b></p>"
+    webserver.content_send("<hr><p><b>Add Remote Tasmota or OpenBK</b></p>"
                            "<form action='/matteradd' method='get'>"
                            "<table style='width:100%'>")
     webserver.content_send("<tr><td width='30' style='font-size:smaller;'><b>http://</b></td><td><input type='text' name='url' size='8' value='' required placeholder='IP or domain'></td><td width='10' style='font-size:smaller;'><b>/</b></td></tr>"
