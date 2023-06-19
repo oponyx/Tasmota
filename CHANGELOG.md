@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 - Matter add controller's Vendor Name to logs and UI
 - Matter redesigned UI
 - Matter add support for Contact Sensor
+- Berry `string.format()` now automatically converts type according to format
+- Matter add friendly-name (NodeLabel) to each endpoint
 
 ### Breaking Changed
 
@@ -23,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - Fixed HASPmota event when value is non-integer (fixes #18229)
 - Matter fix local Occupancy sensor
 - Zigbee fixed regression with SetOption101
+- Berry fixed parser error with upvals in closures
 
 ### Removed
 
