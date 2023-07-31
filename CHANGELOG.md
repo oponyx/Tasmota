@@ -6,15 +6,21 @@ All notable changes to this project will be documented in this file.
 ## [13.0.0.3]
 ### Added
 - Support for MAX17043 fuel-gauge systems Lipo batteries (#18788)
+- Support for multiple PCA9685 with extended functionality (#18805)
+- Zigbee decode Aqara 0000/FF01 attribute 03 as Temperature
 
 ### Breaking Changed
 
 ### Changed
 - Initial ``DisplayMode`` from 1 to 0 and ``DisplayDimmmer`` from 10% to 50% (#19138)
+- ESP32 Framework (Core) from v2.0.10 to v2.0.11
+- Berry `mqtt.publish` now distinguishes between `string` and `bytes`
+- IRremoteESP8266 library from v2.8.5 to v2.8.6
+- Reduced log level for TeleInfo
 
 ### Fixed
 - Initial battery level percentage (#19160)
-- Berry SK6812_GRBW crash
+- Berry SK6812_GRBW crash (#19166)
 
 ### Removed
 
@@ -131,7 +137,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Matter support for Shutters with Tilt
 - Matter POC for remote Relay
-- Support for Zero-Cross Dimmer on ESP32, changed calculation on EPS8266, high resolution control e.g. Solar: `ZCDimmerSet`
+- Support for Zero-Cross Dimmer on ESP32, changed calculation on ESP8266, high resolution control e.g. Solar: `ZCDimmerSet`
 - ESP32 Enhanced Shutterbuttons functionality to control tilt position, additionally incr/decr possible to position and tilt.
 - ESP32 command ``Shuttersetup`` for "Shelly 2.5 pro" automatic calibration and setup (experimental)
 - Berry `tcpclientasync` class for non-blocking TCP client
