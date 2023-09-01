@@ -3,7 +3,50 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - Development
 
-## [13.0.0.3]
+## [13.1.0.2]
+### Added
+
+### Breaking Changed
+
+### Changed
+
+### Fixed
+- PCF8574 mode 1 with base relays exception 3/28 regression from v12.4.0.4 (#19408)
+
+### Removed
+
+## [13.1.0.1] 20230831
+### Added
+- Commands to allow setting of timeprop parameters (#19310)
+- Variables ``%power<1..28>%`` and  ``%switch<1..28>%`` to rules (#19331)
+- Experimental support for ESP32-C2 and ESP32-C6 using Arduino core v3.0 
+
+### Changed
+- Display invert setting after tasmota start in uDisplay driver (#19337)
+
+### Fixed
+- Shutter invert (#19341, #19374)
+- Teleinfo power (#19381)
+- Exception 3 in IRHVAC (#19389)
+
+## [Released] - Development
+
+## [13.1.0] 20230815
+- Release Quentin
+
+## [13.0.0.4] 20230815
+### Added
+- ESP32 prepare for Arduino Core v3 and esp-idf v5 (#19264)
+
+### Changed
+- Console height from default 318 pixels to viewport (#19241)
+- Shutter button hold behaviour with grouptopic (#19263)
+- Thermostat improvements (#19279)
+- PID controller improvements (#19285)
+- HDC1080 detect device offline (#19298)
+- ADE7953 lowered no load threshold (#19302)
+
+## [13.0.0.3] 20230805
 ### Added
 - Support for MAX17043 fuel-gauge systems Lipo batteries (#18788)
 - Support for multiple PCA9685 with extended functionality (#18805)
@@ -11,11 +54,9 @@ All notable changes to this project will be documented in this file.
 - Berry bytes `get` and `set` work for 3 bytes values (#19225)
 - Matter support for fabric_filtered request (for Google compatibility) (#19249)
 
-### Breaking Changed
-
 ### Changed
 - Initial ``DisplayMode`` from 1 to 0 and ``DisplayDimmmer`` from 10% to 50% (#19138)
-- ESP32 Framework (Core) from v2.0.10 to v2.0.11
+- ESP32 Framework (Arduino Core) from v2.0.10 to v2.0.11
 - Berry `mqtt.publish` now distinguishes between `string` and `bytes` (#19196)
 - IRremoteESP8266 library from v2.8.5 to v2.8.6
 - ESP32 autodetect flashsize and adjust filesystem (#19215)
@@ -29,8 +70,8 @@ All notable changes to this project will be documented in this file.
 - Zero cross dimmer minimum interrupt time (#19211)
 - Fade would fail when the difference between start and target would be too small (#19248)
 - Inverted shutter (#19243)
-
-### Removed
+- Matter support for large atribute responses (#19252)
+- Matter auto-configuration Relay indices (#19255)
 
 ## [13.0.0.2] 20230721
 ### Added
@@ -76,8 +117,6 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 - Support for ESP32-C3 with chip rev below 3 (old development boards)
-
-## [Released]
 
 ## [13.0.0] 20230626
 - Release Qasim
