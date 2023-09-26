@@ -23,7 +23,7 @@
 
 class Matter_Plugin_Sensor_OnOff : Matter_Plugin_Device
   static var TYPE = "onoff"                         # name of the plug-in in json
-  static var NAME = "OnOff Sensor"                  # display name of the plug-in
+  static var DISPLAY_NAME = "OnOff Sensor"                  # display name of the plug-in
   static var ARG  = "switch"                        # additional argument name (or empty if none)
   static var ARG_HINT = "Switch<x> number"
   static var ARG_TYPE = / x -> int(x)               # function to convert argument to the right type
@@ -86,6 +86,15 @@ class Matter_Plugin_Sensor_OnOff : Matter_Plugin_Device
     else
       return super(self).read_attribute(session, ctx, tlv_solo)
     end
+  end
+
+  #############################################################
+  # append_state_json
+  #
+  # Output the current state in JSON
+  # New values need to be appended with `,"key":value` (including prefix comma)
+  def append_state_json()
+    return f',"OnOff":{int(self.shadow_onoff)}'
   end
 
 end

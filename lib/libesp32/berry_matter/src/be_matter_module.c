@@ -220,18 +220,23 @@ extern const bclass be_class_Matter_TLV;   // need to declare it upfront because
 #include "solidify/solidified_Matter_Plugin_9_Virt_Light1.h"
 #include "solidify/solidified_Matter_Plugin_4_Light2.h"
 #include "solidify/solidified_Matter_Plugin_9_Virt_Light2.h"
-#include "solidify/solidified_Matter_Plugin_3_Light3.h"
+#include "solidify/solidified_Matter_Plugin_4_Light3.h"
 #include "solidify/solidified_Matter_Plugin_9_Virt_Light3.h"
 #include "solidify/solidified_Matter_Plugin_2_Shutter.h"
 #include "solidify/solidified_Matter_Plugin_3_ShutterTilt.h"
 #include "solidify/solidified_Matter_Plugin_2_Sensor.h"
 #include "solidify/solidified_Matter_Plugin_3_Sensor_Pressure.h"
+#include "solidify/solidified_Matter_Plugin_9_Virt_Sensor_Pressure.h"
 #include "solidify/solidified_Matter_Plugin_3_Sensor_Temp.h"
+#include "solidify/solidified_Matter_Plugin_9_Virt_Sensor_Temp.h"
 #include "solidify/solidified_Matter_Plugin_3_Sensor_Illuminance.h"
+#include "solidify/solidified_Matter_Plugin_9_Virt_Sensor_Illuminance.h"
 #include "solidify/solidified_Matter_Plugin_3_Sensor_Humidity.h"
+#include "solidify/solidified_Matter_Plugin_9_Virt_Sensor_Humidity.h"
 #include "solidify/solidified_Matter_Plugin_3_Sensor_Occupancy.h"
 #include "solidify/solidified_Matter_Plugin_3_Sensor_OnOff.h"
 #include "solidify/solidified_Matter_Plugin_3_Sensor_Contact.h"
+#include "solidify/solidified_Matter_Plugin_9_Virt_Sensor_Contact.h"
 #include "solidify/solidified_Matter_Plugin_2_Bridge_HTTP.h"
 #include "solidify/solidified_Matter_Plugin_4_Bridge_OnOff.h"
 #include "solidify/solidified_Matter_Plugin_3_Bridge_Light0.h"
@@ -296,6 +301,7 @@ module matter (scope: global, strings: weak) {
   jitter, closure(matter_jitter_closure)
   inspect, closure(matter_inspect_closure)
   consolidate_clusters, closure(matter_consolidate_clusters_closure)
+  UC_LIST, closure(matter_UC_LIST_closure)
   Profiler, class(be_class_Matter_Profiler)
 
   // Status codes
@@ -441,12 +447,17 @@ module matter (scope: global, strings: weak) {
   Plugin_ShutterTilt, class(be_class_Matter_Plugin_ShutterTilt)   // Shutter + Tilt
   Plugin_Sensor, class(be_class_Matter_Plugin_Sensor)     // Generic Sensor
   Plugin_Sensor_Pressure, class(be_class_Matter_Plugin_Sensor_Pressure)   // Pressure Sensor
+  Plugin_Sensor_Virt_Pressure, class(be_class_Matter_Plugin_Virt_Sensor_Pressure)   // Pressure Virtual Sensor
   Plugin_Sensor_Temp, class(be_class_Matter_Plugin_Sensor_Temp)           // Temperature Sensor
+  Plugin_Virt_Sensor_Temp, class(be_class_Matter_Plugin_Virt_Sensor_Temp)           // Temperature Sensor
   Plugin_Sensor_Illuminance, class(be_class_Matter_Plugin_Sensor_Illuminance) // Illuminance Sensor
+  Plugin_Virt_Sensor_Illuminance, class(be_class_Matter_Plugin_Virt_Sensor_Illuminance) // Illuminance Virtual Sensor
   Plugin_Sensor_Humidity, class(be_class_Matter_Plugin_Sensor_Humidity)   // Humidity Sensor
+  Plugin_Sensor_Virt_Humidity, class(be_class_Matter_Plugin_Virt_Sensor_Humidity)   // Humidity Virtual Sensor
   Plugin_Sensor_Occupancy, class(be_class_Matter_Plugin_Sensor_Occupancy)           // Occupancy Sensor
   Plugin_Sensor_OnOff, class(be_class_Matter_Plugin_Sensor_OnOff)           // Simple OnOff Sensor
   Plugin_Sensor_Contact, class(be_class_Matter_Plugin_Sensor_Contact)           // Contact Sensor
+  Plugin_Virt_Sensor_Contact, class(be_class_Matter_Plugin_Virt_Sensor_Contact)           // Virtual Contact Sensor
   Plugin_Bridge_HTTP, class(be_class_Matter_Plugin_Bridge_HTTP)     // HTTP bridge superclass
   Plugin_Bridge_OnOff, class(be_class_Matter_Plugin_Bridge_OnOff)     // HTTP Relay/Light behavior (OnOff)
   Plugin_Bridge_Light0, class(be_class_Matter_Plugin_Bridge_Light0)   // HTTP OnOff Light

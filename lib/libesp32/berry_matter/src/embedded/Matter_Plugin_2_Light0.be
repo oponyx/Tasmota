@@ -25,7 +25,7 @@ import matter
 
 class Matter_Plugin_Light0 : Matter_Plugin_Device
   static var TYPE = "light0"                        # name of the plug-in in json
-  static var NAME = "Light 0 On"                    # display name of the plug-in
+  static var DISPLAY_NAME = "Light 0 On"                    # display name of the plug-in
   static var UPDATE_TIME = 250                      # update every 250ms
   static var CLUSTERS  = matter.consolidate_clusters(_class,
   {
@@ -35,6 +35,7 @@ class Matter_Plugin_Light0 : Matter_Plugin_Device
     # 0x0005: inherited                             # Scenes 1.4 p.30 - no writable
     0x0006: [0,0xFFFC,0xFFFD],                      # On/Off 1.5 p.48
   })
+  static var UPDATE_COMMANDS = matter.UC_LIST(_class, "Power")
   static var TYPES = { 0x0100: 2 }                  # OnOff Light, but not actually used because Relay is managed by OnOff
 
   # Inherited
@@ -43,7 +44,6 @@ class Matter_Plugin_Light0 : Matter_Plugin_Device
   # var clusters                                      # map from cluster to list of attributes, typically constructed from CLUSTERS hierachy
   # var tick                                          # tick value when it was last updated
   # var node_label                                    # name of the endpoint, used only in bridge mode, "" if none
-  # var virtual                                       # (bool) is the device pure virtual (i.e. not related to a device implementation by Tasmota)
   var shadow_onoff                                  # (bool) status of the light power on/off
 
   #############################################################
@@ -57,7 +57,7 @@ class Matter_Plugin_Light0 : Matter_Plugin_Device
   # Update shadow
   #
   def update_shadow()
-    if !self.virtual
+    if !self.VIRTUAL
       import light
       var light_status = light.get()
       if light_status != nil
@@ -72,7 +72,7 @@ class Matter_Plugin_Light0 : Matter_Plugin_Device
   end
 
   def set_onoff(pow)
-    if !self.virtual
+    if !self.VIRTUAL
       import light
       light.set({'power':pow})
       self.update_shadow()
@@ -150,7 +150,7 @@ class Matter_Plugin_Light0 : Matter_Plugin_Device
   #
   # Update internal state for virtual devices
   def update_virtual(payload_json)
-    var val_onoff = self.find_val_i(payload_json, 'Power')
+    var val_onoff = payload_json.find("Power")
     if val_onoff != nil
       self.set_onoff(bool(val_onoff))
     end

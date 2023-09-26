@@ -25,7 +25,7 @@ import matter
 
 class Matter_Plugin_Light1 : Matter_Plugin_Light0
   static var TYPE = "light1"                                # name of the plug-in in json
-  static var NAME = "Light 1 Dimmer"                        # display name of the plug-in
+  static var DISPLAY_NAME = "Light 1 Dimmer"                        # display name of the plug-in
   static var CLUSTERS  = matter.consolidate_clusters(_class, {
     # 0x001D: inherited                                     # Descriptor Cluster 9.5 p.453
     # 0x0003: inherited                                     # Identify 1.2 p.16
@@ -34,6 +34,7 @@ class Matter_Plugin_Light1 : Matter_Plugin_Light0
     # 0x0006: inherited                                     # On/Off 1.5 p.48
     0x0008: [0,2,3,0x0F,0x11,0xFFFC,0xFFFD],                # Level Control 1.6 p.57
   })
+  static var UPDATE_COMMANDS = matter.UC_LIST(_class, "Bri")
   static var TYPES = { 0x0101: 2 }                  # Dimmable Light
 
   # Inherited
@@ -42,7 +43,6 @@ class Matter_Plugin_Light1 : Matter_Plugin_Light0
   # var clusters                                      # map from cluster to list of attributes, typically constructed from CLUSTERS hierachy
   # var tick                                          # tick value when it was last updated
   # var node_label                                    # name of the endpoint, used only in bridge mode, "" if none
-  # var virtual                                       # (bool) is the device pure virtual (i.e. not related to a device implementation by Tasmota)
   # var shadow_onoff                                  # (bool) status of the light power on/off
   var shadow_bri                                    # (int 0..254) brightness before Gamma correction - as per Matter 255 is not allowed
 
@@ -57,7 +57,7 @@ class Matter_Plugin_Light1 : Matter_Plugin_Light0
   # Update shadow
   #
   def update_shadow()
-    if !self.virtual
+    if !self.VIRTUAL
       import light
       var light_status = light.get()
       if light_status != nil
@@ -82,7 +82,8 @@ class Matter_Plugin_Light1 : Matter_Plugin_Light0
   def set_bri(bri_254, pow)
     if (bri_254 < 0)    bri_254 = 0     end
     if (bri_254 > 254)  bri_254 = 254   end
-    if !self.virtual
+    pow = (pow != nil) ? bool(pow) : nil        # nil or bool
+    if !self.VIRTUAL
       import light
       var bri_255 = tasmota.scale_uint(bri_254, 0, 254, 0, 255)
       if pow == nil
@@ -185,6 +186,20 @@ class Matter_Plugin_Light1 : Matter_Plugin_Light0
     else
       return super(self).invoke_request(session, val, ctx)
     end
+  end
+
+  #############################################################
+  # update_virtual
+  #
+  # Update internal state for virtual devices
+  def update_virtual(payload_json)
+    var val_onoff = payload_json.find("Power")
+    var val_bri = payload_json.find("Bri")
+    if val_bri != nil
+      self.set_bri(int(val_bri), val_onoff)
+      return    # don't call super() because we already handeld 'Power'
+    end
+    super(self).update_virtual(payload_json)
   end
 
 end
