@@ -33,10 +33,6 @@
   #define SHUTTER_RELAY_OPERATION_TIME 100 // wait for direction relay 0.1sec before power up main relay
 #endif
 
-#ifndef MOTOR_STOP_TIME
- #define MOTOR_STOP_TIME 500 // wait 0.5 second after stop to do any other action. e.g. move in the opposite direction
-#endif
-
 //#define SHUTTER_UNITTEST
 
 #define D_SHUTTER "SHUTTER"
@@ -572,10 +568,7 @@ void ShutterInit(void)
   //Initialize to get relay that changed
   ShutterGlobal.RelayOldMask = TasmotaGlobal.power;
 
-  // if shutter 4 is unused
-  if (ShutterSettings.shutter_startrelay[MAX_SHUTTERS_ESP32 -1] == 0) {
-     ShutterGlobal.open_velocity_max = ShutterSettings.shuttercoeff[4][3] > 0 ? ShutterSettings.shuttercoeff[4][3] : ShutterGlobal.open_velocity_max;
-  }
+  ShutterGlobal.open_velocity_max = ShutterSettings.open_velocity_max;
   for (uint32_t i = 0; i < MAX_SHUTTERS_ESP32; i++) {
     // set startrelay to 1 on first init, but only to shutter 1. 90% usecase
     if (ShutterSettings.shutter_startrelay[i] && (ShutterSettings.shutter_startrelay[i] <= 32 )) {
@@ -825,7 +818,6 @@ void ShutterPowerOff(uint8_t i)
   if (Settings->save_data) {
     TasmotaGlobal.save_data_counter = Settings->save_data;
   }
-  //delay(MOTOR_STOP_TIME);
   Shutter[i].last_stop_time = millis();
 }
 
@@ -958,11 +950,10 @@ void ShutterReportPosition(bool always, uint32_t index)
       ShutterLogPos(i);
       shutter_running++;
     }
-    if (i && index == MAX_SHUTTERS) { ResponseAppend_P(PSTR(",")); }
+    if (i && index == MAX_SHUTTERS_ESP32) { ResponseAppend_P(PSTR(",")); }
     uint32_t position = ShutterRealToPercentPosition(Shutter[i].real_position, i);
     uint32_t target   = ShutterRealToPercentPosition(Shutter[i].target_position, i);
     ResponseAppend_P(JSON_SHUTTER_POS, i + 1, (ShutterSettings.shutter_options[i] & 1) ? 100 - position : position, Shutter[i].direction,(ShutterSettings.shutter_options[i] & 1) ? 100 - target : target, Shutter[i].tilt_real_pos );
-    //ResponseAppend_P(JSON_SHUTTER_POS, i+1,  position, Shutter[i].direction, target, Shutter[i].tilt_real_pos );
    }
   ResponseJsonEnd();
   if (always || shutter_running) {
@@ -1002,7 +993,8 @@ void ShutterRtc50mS(void)
             startWaveformClockCycles(Pin(GPIO_PWM1, i), cc/2, cc/2, 0, -1, 0, false);
   #endif  // ESP8266
   #ifdef ESP32
-            analogWriteFreq(Shutter[i].pwm_velocity,Pin(GPIO_PWM1, i));
+            ledcWriteTone(i, Shutter[i].pwm_velocity);  //
+            ledcWrite(i, 512);  // Setzt den PWM-Wert auf 0
             TasmotaGlobal.pwm_value[i] = 512;
             pwm_apply = true;
   #endif  // ESP32
@@ -1185,9 +1177,10 @@ void ShutterStartInit(uint32_t i, int32_t direction, int32_t target_pos)
         analogWrite(Pin(GPIO_PWM1, i), 0);
 #endif
 #ifdef ESP32
-        analogWriteFreq(PWM_MIN,Pin(GPIO_PWM1, i));
-        TasmotaGlobal.pwm_value[i] = 0;
-        PwmApplyGPIO(false);
+        ledcSetup(i, Shutter[i].pwm_velocity, 8);
+        ledcAttachPin(Pin(GPIO_PWM1, i), i);  // Nehmen Sie an, dass GPIO_PWM1 der gewünschte GPIO-Pin ist.
+        ledcWriteTone(i, Shutter[i].pwm_velocity);  //
+        ledcWrite(i, 0);  // Setzt den PWM-Wert auf 0
 #endif
         RtcSettings.pulse_counter[i] = 0;
       break;
@@ -1714,9 +1707,7 @@ void CmndShutterFrequency(void)
 {
   if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload <= 20000)) {
     ShutterGlobal.open_velocity_max =  XdrvMailbox.payload;
-    if (TasmotaGlobal.shutters_present < 4) {
-      ShutterSettings.shuttercoeff[4][3] = ShutterGlobal.open_velocity_max;
-    }
+    ShutterSettings.open_velocity_max = ShutterGlobal.open_velocity_max;
     ShutterInit();
   }
   ResponseCmndNumber(ShutterGlobal.open_velocity_max);
@@ -1941,10 +1932,8 @@ void CmndShutterPosition(void)
                   AddLog(LOG_LEVEL_INFO, PSTR("SHT: Garage not move in this direction: %d"), Shutter[index].switch_mode == SHT_PULSE);
                   for (uint8_t k = 0 ; k <= (uint8_t)(Shutter[index].switch_mode == SHT_PULSE) ; k++) {
                     ExecuteCommandPowerShutter(ShutterSettings.shutter_startrelay[index], 1, SRC_SHUTTER);
-                    //delay(MOTOR_STOP_TIME);
                     ShutterWaitForMotorStop(index);
                     ExecuteCommandPowerShutter(ShutterSettings.shutter_startrelay[index], 0, SRC_SHUTTER);
-                    //delay(MOTOR_STOP_TIME);
                     ShutterWaitForMotorStop(index);
                   }
                   // reset shutter time to avoid 2 seconds above count as runtime
@@ -2332,7 +2321,9 @@ bool Xdrv27(uint32_t function)
       case FUNC_JSON_APPEND:
         for (uint8_t i = 0; i < TasmotaGlobal.shutters_present; i++) {
           ResponseAppend_P(",");
-          ResponseAppend_P(JSON_SHUTTER_POS, i + 1, ShutterRealToPercentPosition(Shutter[i].real_position, i), Shutter[i].direction, ShutterRealToPercentPosition(Shutter[i].target_position, i), Shutter[i].tilt_real_pos);
+          uint8_t position = ShutterRealToPercentPosition(Shutter[i].real_position, i);
+          uint8_t target   = ShutterRealToPercentPosition(Shutter[i].target_position, i);
+          ResponseAppend_P(JSON_SHUTTER_POS, i + 1, (ShutterSettings.shutter_options[i] & 1) ? 100 - position : position, Shutter[i].direction,(ShutterSettings.shutter_options[i] & 1) ? 100 - target : target, Shutter[i].tilt_real_pos );
 #ifdef USE_DOMOTICZ
           if ((0 == TasmotaGlobal.tele_period) && (0 == i)) {
              DomoticzSensor(DZ_SHUTTER, ShutterRealToPercentPosition(Shutter[i].real_position, i));
