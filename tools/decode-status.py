@@ -90,7 +90,7 @@ a_setoption = [[
     "(Restart) Number of restarts to start detecting boot loop (default 1)",
     "(Light) RGB and White channel separation (default 0)",
     "(IR) Set the smallest sized UNKNOWN message packets we actually care about (default 6, max 255)",
-    "(CSE7766) Number of invalid power measurements before declaring it invalid allowing low load measurments (default 128)",
+    "(CSE7766) Number of invalid power measurements before declaring it invalid allowing low load measurements (default 128)",
     "(Button/Shutter) Ignore button change in seconds (default 0)",
     "(Wifi) Interval in seconds between gratuitous ARP requests (default 60)",
     "(Energy) Turn all power off at or above this temperature (default 90C)",
@@ -300,7 +300,7 @@ a_features = [[
     "USE_BIOPDU","USE_MCP23XXX_DRV","USE_PMSA003I","USE_LOX_O2",
     "USE_GDK101","USE_GM861","USE_TC74","USE_PCA9557",
     "USE_SGP4X","USE_MAX17043","USE_ENS16x","USE_ENS210",
-    "","","",""
+    "USE_HC8","","",""
     ]]
 
 usage = "usage: decode-status {-d | -f} arg"
@@ -328,7 +328,7 @@ else:
         obj = json.load(fp)
 
 def StartDecode():
-    print ("\n*** decode-status.py v13.1.0.1 by Theo Arends and Jacek Ziolkowski ***")
+    print ("\n*** decode-status.py v13.1.0.4 by Theo Arends and Jacek Ziolkowski ***")
 
 #    print("Decoding\n{}".format(obj))
 
