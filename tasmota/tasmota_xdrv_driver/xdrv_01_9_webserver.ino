@@ -408,7 +408,7 @@ const char HTTP_COUNTER[] PROGMEM =
   "<br><div id='t' style='text-align:center;'></div>";
 
 const char HTTP_END[] PROGMEM =
-  "<div style='text-align:right;font-size:11px;'><hr/><a href='https://bit.ly/tasmota' target='_blank' style='color:#aaa;'>Tasmota %s " D_BY " Theo Arends</a></div>"
+  "<div style='text-align:right;font-size:11px;'><hr/><a href='https://bit.ly/tasmota' target='_blank' style='color:#aaa;'>Tasmota %s%s " D_BY " Theo Arends</a></div>"
   "</div>"
   "</body>"
   "</html>";
@@ -1005,7 +1005,7 @@ void WSContentStop(void) {
       WSContentSend_P(HTTP_COUNTER);
     }
   }
-  WSContentSend_P(HTTP_END, TasmotaGlobal.version);
+  WSContentSend_P(HTTP_END, TasmotaGlobal.version, TasmotaGlobal.image_name);
   WSContentEnd();
 }
 
@@ -2851,7 +2851,7 @@ void HandleUploadLoop(void) {
           char tmp[16];
           WebGetArg("fsz", tmp, sizeof(tmp));                    // filesize
           uint32_t upload_size = (!strlen(tmp)) ? 0 : atoi(tmp);
-          AddLog(LOG_LEVEL_DEBUG, D_LOG_UPLOAD "freespace=%i filesize=%i", ESP.getFreeSketchSpace(), upload_size);
+          AddLog(LOG_LEVEL_DEBUG, D_LOG_UPLOAD "Freespace %i Filesize %i", ESP.getFreeSketchSpace(), upload_size);
           if (upload_size > ESP.getFreeSketchSpace()) {   // TODO revisit this test
 #endif
             Web.upload_error = 4;  // Program flash size is larger than real flash size
