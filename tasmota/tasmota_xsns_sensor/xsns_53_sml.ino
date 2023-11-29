@@ -1337,6 +1337,19 @@ void ebus_esc(uint8_t *ebus_buffer, unsigned char len) {
 
 }
 
+// check ebus escapes
+uint8_t check_ebus_esc(uint8_t *ebus_buffer, unsigned char len) {
+    short count,count1;
+    count1 = 0;
+    for (count = 0; count < len; count++) {
+        if (ebus_buffer[count] == EBUS_ESC) {
+            //found escape
+            count1++;
+        }
+    }
+    return count1;
+}
+
 uint8_t ebus_crc8(uint8_t data, uint8_t crc_init) {
 	uint8_t crc;
 	uint8_t polynom;
@@ -1458,6 +1471,7 @@ void sml_shift_in(uint32_t meters, uint32_t shard) {
 			uint32_t timediff = millis() - mp->lastms;
 			if (timediff > mp->tout_ms) {
 				mp->spos = 0;
+        SML_Decode(meters);
 				AddLog(LOG_LEVEL_DEBUG, PSTR("SML: sync"));
 			}
 			mp->lastms = millis();
@@ -1567,16 +1581,16 @@ void sml_shift_in(uint32_t meters, uint32_t shard) {
       if (iob == EBUS_SYNC) {
         // should be end of telegramm
         // QQ,ZZ,PB,SB,NN ..... CRC, ACK SYNC
-        if (mp->spos > 4 + 5) {
+        if (mp->spos > 5 && mp->spos > mp->sbuff[4] + 5) {
           // get telegramm lenght
-          uint16_t tlen = mp->sbuff[4] + 5;
+          uint16_t tlen = mp->sbuff[4] + 5 + check_ebus_esc(mp->sbuff, mp->spos);
           // test crc
-          if (mp->sbuff[tlen] = ebus_CalculateCRC(mp->sbuff, tlen)) {
-              ebus_esc(mp->sbuff, tlen);
+          if (mp->sbuff[tlen] == ebus_CalculateCRC(mp->sbuff, tlen)) {
+              ebus_esc(mp->sbuff, mp->spos);
               SML_Decode(meters);
           } else {
               // crc error
-              //AddLog(LOG_LEVEL_INFO, PSTR("ebus crc error"));
+              AddLog(LOG_LEVEL_INFO, PSTR("ebus crc error"));
           }
         }
         mp->spos = 0;
@@ -1902,7 +1916,7 @@ void SML_Decode(uint8_t index) {
         }
         if (sml_globs.mp[mindex].type == 'o' || sml_globs.mp[mindex].type == 'c') {
           if (*mp++ != *cp++) {
-            found=0;
+            found = 0;
           }
         } else {
           if (sml_globs.mp[mindex].type == 's') {
@@ -1962,7 +1976,9 @@ void SML_Decode(uint8_t index) {
         							}
 #endif
 										}
-									}
+									} else {
+                    found = 0;
+                  }
 									break;
 								}
 								uint8_t iob;
@@ -2335,8 +2351,27 @@ void SML_Decode(uint8_t index) {
                   goto getstr;
                 }
                 dval = CharToDouble((char*)lcp);
+              } else if (*mp == 's') {
+                  mp++;
+                  char delim = *mp;
+                  mp++;
+                  uint8_t toskip = strtol((char*)mp,(char**)&mp, 10);
+                  mp++;
+                  char *lcp = (char*)cp;
+                  if (toskip) {
+                    char *bp = (char*)cp;
+                    for (uint32_t cnt = 0; cnt < toskip; cnt++) {
+                      bp = strchr(bp, delim);
+                      if (!bp) {
+                        break;
+                      }
+                      bp++;
+                      lcp = bp;
+                    }
+                  }
+                  dval = CharToDouble((char*)lcp);
               } else {
-                dval = CharToDouble((char*)cp);
+                  dval = CharToDouble((char*)cp);
               }
             } else {
               dval = sml_getvalue(cp, mindex);
@@ -2531,6 +2566,16 @@ void SML_Show(boolean json) {
           } else if (*cp == '(') {
             if (sml_globs.mp[mindex].type == 'o') {
               cp++;
+              strtol((char*)cp,(char**)&cp, 10);
+              cp++;
+              goto tststr;
+            } else {
+              mid = 0;
+            }
+          } else if (*cp == 's') {
+            // skip values
+            if (sml_globs.mp[mindex].type == 'o') {
+              cp += 2;
               strtol((char*)cp,(char**)&cp, 10);
               cp++;
               goto tststr;
@@ -3725,6 +3770,19 @@ uint32_t sml_getv(uint32_t sel) {
   return sel;
 }
 
+uint32_t SML_Shift_Num(uint32_t meter, uint32_t shift) {
+  struct METER_DESC *mp = &sml_globs.mp[meter];
+  if (shift > mp->sbsiz) shift = mp->sbsiz;
+  for (uint16_t cnt = 0; cnt < shift; cnt++) {
+     for (uint16_t count = 0; count < mp->sbsiz - 1; count++) {
+      mp->sbuff[count] = mp->sbuff[count + 1];
+      SML_Decode(meter);
+    }
+  }
+  return shift;
+}
+
+
 double SML_GetVal(uint32_t index) {
   if (sml_globs.ready == false) return 0;
   if (index < 1 || index > sml_globs.maxvars) { index = 1;}
@@ -3984,7 +4042,7 @@ void SML_Check_Send(void) {
   sml_globs.sml_100ms_cnt++;
   char *cp;
   for (uint32_t cnt = sml_globs.sml_desc_cnt; cnt < sml_globs.meters_used; cnt++) {
-    if (meter_desc[cnt].trxpin >= 0 && meter_desc[cnt].txmem) {
+    if (meter_desc[cnt].trxpin >= 0 && (meter_desc[cnt].txmem || meter_desc[cnt].script_str)) {
       //AddLog(LOG_LEVEL_INFO, PSTR("100 ms>> %d - %s - %d"),sml_globs.sml_desc_cnt,meter_desc[cnt].txmem,meter_desc[cnt].tsecs);
       if ((sml_globs.sml_100ms_cnt >= meter_desc[cnt].tsecs)) {
         sml_globs.sml_100ms_cnt = 0;
