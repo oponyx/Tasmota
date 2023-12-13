@@ -3,10 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - Development
 
-## [13.2.0.3]
+## [13.3.0.1]
 ### Added
-- DeepSleep support through TIMERS (#20117)
-- Command ``WebCanvas linear-gradient(#FF0018 7%,#FFA52C,#FFFF41,#008018,#0000F9,#86007D 93%)`` to set GUI canvas
 
 ### Breaking Changed
 
@@ -15,6 +13,29 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 ### Removed
+
+## [Released]
+
+## [13.3.0] 20231213
+- Release Quinlan
+
+## [13.2.0.3] 20231213
+### Added
+- DeepSleep support through TIMERS (#20117)
+- Command ``WebCanvas linear-gradient(#F02 7%,#F93,#FF4,#082,#00F,#708 93%)`` to set GUI canvas
+
+### Breaking Changed
+- Remove Berry `every_200ms` event which didn't work anyways (#20205)
+
+### Changed
+- ESP32 LVGL library from v8.3.10 to v8.3.11 (no functional change)
+- Berry ULP API changes for Core3/IDF5 (#20198)
+- Berry leds animation refactoring stage 1 (#20197)
+
+### Fixed
+- TUYA state machine (in TUYA v1) (#20110)
+- ESP32 Neopixel flicker for Core3/IDF5 (#20196)
+- HASPmota `bar` fixed `val` attribute (#20208)
 
 ## [13.2.0.2] 20231130
 ### Added
@@ -63,7 +84,7 @@ All notable changes to this project will be documented in this file.
 - NeoPool enhancements for HA (#19857)
 - ST7735S display.ini for 1.44 inch 128x128 red SPI display (#19862)
 - HASPmota add styling properties (#19912)
-- Matter flow sensor suppor (#19852)
+- Matter flow sensor support (#19852)
 
 ### Breaking Changed
 - NeoPool SENSOR topic ``Power`` renamed to ``Powerunit`` (#19857)
@@ -80,8 +101,6 @@ All notable changes to this project will be documented in this file.
 - Compile USE_PID (#19890)
 - ESP32 I2C allow bus2 support when bus1 is not enabled
 - ESP32 IR receive with Arduino Core 3 (#19904)
-
-## [Released]
 
 ## [13.2.0] 20231019
 - Release Quincy
