@@ -5,12 +5,15 @@ All notable changes to this project will be documented in this file.
 
 ## [13.3.0.1]
 ### Added
+- Support for Sonoff Basic R4 Magic Switch (#20247)
 
 ### Breaking Changed
+- Refactoring of Berry `animate` module for WS2812 Leds (#20236)
 
 ### Changed
 
 ### Fixed
+- Matter Contact sensor was not triggering any update (#20232)
 
 ### Removed
 
