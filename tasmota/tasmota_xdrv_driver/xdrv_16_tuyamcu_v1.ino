@@ -1248,6 +1248,9 @@ void TuyaInit(void) {
     TuyaSerial = new TasmotaSerial(Pin(GPIO_TUYA_RX), Pin(GPIO_TUYA_TX), 2);
     if (TuyaSerial->begin(baudrate)) {
       if (TuyaSerial->hardwareSerial()) { ClaimSerial(); }
+#ifdef ESP32
+      AddLog(LOG_LEVEL_DEBUG, PSTR("TYA: Serial UART%d"), TuyaSerial->getUart());
+#endif  // ESP32
       // Get MCU Configuration
       Tuya.SuspendTopic = true;
       Tuya.ignore_topic_timeout = millis() + 1000; // suppress /STAT topic for 1000ms to avoid data overflow
@@ -1725,6 +1728,9 @@ bool Xdrv16(uint32_t function) {
         TuyaSensorsShow(0);
         break;
 #endif  // USE_WEBSERVER
+      case FUNC_ACTIVE:
+        result = true;
+        break;
     }
   }
   return result;
