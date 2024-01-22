@@ -57,6 +57,7 @@
 #define D_AP "AP"                    // Access Point
 #define D_AS "as"
 #define D_AUTO "AUTO"
+#define D_BATTERY "Battery"
 #define D_BATT "Batt"                // Short for Battery
 #define D_BATTERY_CHARGE "Lading"    // Battery charge in %
 #define D_BLINK "Flits"
@@ -547,7 +548,7 @@
 #define D_DEVICE_INPUT "Invoer"
 #define D_DEVICE_OUTPUT "Uitvoer"
 
-// xdrv_39_thermostat.ino
+// xdrv_39_thermostat.ino, xdrv_85_esp32_ble_eq3_trv.ino
 #define D_THERMOSTAT                  "Thermostat"
 #define D_THERMOSTAT_SET_POINT        "Set Point Temperature"
 #define D_THERMOSTAT_SENSOR           "Current Temperature"
@@ -1222,5 +1223,9 @@
 // xsns_106_gdk101.ino
 #define D_AVG_RAD_DOSE                    "Gemiddelde Stralingsdosis"
 #define D_UNIT_US_H                       "µSv/h"
+
+// ixrv92_pipsolar.ino
+#define D_SENSOR_PIPSOLAR_TX             "Pipsolar TX"
+#define D_SENSOR_PIPSOLAR_RX             "Pipsolar RX"
 
 #endif  // _LANGUAGE_AF_AF_H_

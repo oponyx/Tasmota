@@ -57,6 +57,7 @@
 #define D_AP "AP"                    // Access Point
 #define D_AS "mint"
 #define D_AUTO "AUTO"
+#define D_BATTERY "Battery"
 #define D_BATT "Batt"                // Short for Battery
 #define D_BATTERY_CHARGE "Charge"   // Battery charge in %
 #define D_BLINK "Villogás"
@@ -547,7 +548,7 @@
 #define D_DEVICE_INPUT "Bemenet"
 #define D_DEVICE_OUTPUT "Kimenet"
 
-// xdrv_39_thermostat.ino
+// xdrv_39_thermostat.ino, xdrv_85_esp32_ble_eq3_trv.ino
 #define D_THERMOSTAT                  "Thermostat"
 #define D_THERMOSTAT_SET_POINT        "Set Point Temperature"
 #define D_THERMOSTAT_SENSOR           "Current Temperature"
@@ -1225,5 +1226,9 @@
 // xsns_106_gdk101.ino
 #define D_AVG_RAD_DOSE                    "átlagos sugárdózis"
 #define D_UNIT_US_H                       "µSv/h"
+
+// ixrv92_pipsolar.ino
+#define D_SENSOR_PIPSOLAR_TX             "Pipsolar TX"
+#define D_SENSOR_PIPSOLAR_RX             "Pipsolar RX"
 
 #endif  // _LANGUAGE_HU_HU_H_

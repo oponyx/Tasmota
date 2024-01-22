@@ -28,7 +28,7 @@
  * Use online command StateText to translate ON, OFF, HOLD and TOGGLE.
  * Use online command Prefix to translate cmnd, stat and tele.
  *
- * Updated until v13.3.0.1 - Last update 18.12.2023
+ * Updated until v13.3.0.3 - Last update 12.01.2024
 \*********************************************************************/
 
 //#define LANGUAGE_MODULE_NAME         // Enable to display "Module Generic" (ie Spanish), Disable to display "Generic Module" (ie English)
@@ -57,6 +57,7 @@
 #define D_AP "AP"                    // Access Point
 #define D_AS "als"
 #define D_AUTO "AUTO"
+#define D_BATTERY "Batterie"
 #define D_BATT "Batt"                // Short for Battery
 #define D_BATTERY_CHARGE "Ladung"    // Battery charge in %
 #define D_BLINK "Blinken"
@@ -274,7 +275,7 @@
 #define D_CONFIGURATION "Einstellungen"
 #define D_INFORMATION "Informationen"
 #define D_FIRMWARE_UPGRADE "Firmware Update"
-#define D_MANAGEMENT "Konsolen"
+#define D_MANAGEMENT "Werkzeuge"
 #define D_GPIO_VIEWER "GPIO Viewer"
 #define D_CONSOLE "Konsole"
 #define D_CONFIRM_RESTART "Wirklich neustarten?"
@@ -547,7 +548,7 @@
 #define D_DEVICE_INPUT "Eingang"
 #define D_DEVICE_OUTPUT "Ausgang"
 
-// xdrv_39_thermostat.ino
+// xdrv_39_thermostat.ino, xdrv_85_esp32_ble_eq3_trv.ino
 #define D_THERMOSTAT                  "Thermostat"
 #define D_THERMOSTAT_SET_POINT        "Solltemperatur"
 #define D_THERMOSTAT_SENSOR           "Aktuelle Temperatur"
@@ -1222,5 +1223,9 @@
 // xsns_106_gdk101.ino
 #define D_AVG_RAD_DOSE                    "durchschnittliche Strahlendosis"
 #define D_UNIT_US_H                       "µSv/h"
+
+// ixrv92_pipsolar.ino
+#define D_SENSOR_PIPSOLAR_TX             "Pipsolar TX"
+#define D_SENSOR_PIPSOLAR_RX             "Pipsolar RX"
 
 #endif  // _LANGUAGE_DE_DE_H_
