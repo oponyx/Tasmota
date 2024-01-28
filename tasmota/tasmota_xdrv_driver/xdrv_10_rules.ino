@@ -114,8 +114,6 @@
 const char kCompareOperators[] PROGMEM = "=\0>\0<\0|\0==!=>=<=$>$<$|$!$^";
 
 #ifdef USE_EXPRESSION
-  #include <LinkedList.h>                 // Import LinkedList library
-
   const char kExpressionOperators[] PROGMEM = "+-*/%^\0";
   #define EXPRESSION_OPERATOR_ADD         0
   #define EXPRESSION_OPERATOR_SUBTRACT    1
@@ -126,7 +124,6 @@ const char kCompareOperators[] PROGMEM = "=\0>\0<\0|\0==!=>=<=$>$<$|$!$^";
 
   const uint8_t kExpressionOperatorsPriorities[] PROGMEM = {1, 1, 2, 2, 3, 4};
   #define MAX_EXPRESSION_OPERATOR_PRIORITY    4
-
 
   #define LOGIC_OPERATOR_AND        1
   #define LOGIC_OPERATOR_OR         2
@@ -1171,55 +1168,53 @@ bool RulesMqttData(void) {
   XdrvMailbox.data = (char*)data;
   XdrvMailbox.data_len = data_len;
 */
-  if (XdrvMailbox.data_len < 1) {
+  if ((XdrvMailbox.data_len < 1) || (subscriptions.isEmpty())) {
     return false;                              // Process unchanged data
   }
   bool serviced = false;
-  String buData = XdrvMailbox.data;            // Could be very long SENSOR message
+  String buData = XdrvMailbox.data;            // Destroyed by JsonParser. Could be very long SENSOR message
+  char ctopic[strlen(XdrvMailbox.topic)+1];
+  strcpy(ctopic, XdrvMailbox.topic);           // Destroyed by result of following iteration
 
-  // Looking for matched topic
-  for (auto &event_item : subscriptions) {
-    char stopic[strlen(event_item.topic)+2];
-    strcpy(stopic, event_item.topic);
-    strcat(stopic, "/");
-    if ((strcmp(XdrvMailbox.topic, event_item.topic) == 0) ||                    // Equal
-        (strncmp(XdrvMailbox.topic, stopic, strlen(XdrvMailbox.topic)) == 0)) {  // StartsWith 
+  for (auto &event_item : subscriptions) {     // Looking for all matched topics
+    char etopic[strlen(event_item.topic)+2];
+    strcpy(etopic, event_item.topic);          // tele/tasmota/SENSOR
+    strcat(etopic, "/");                       // tele/tasmota/SENSOR/
+    if ((strcmp(ctopic, event_item.topic) == 0) ||         // Equal tele/tasmota/SENSOR
+        (strncmp(ctopic, etopic, strlen(etopic)) == 0)) {  // StartsWith tele/tasmota/SENSOR/
 
-      // This topic is subscribed by us, so serve it
-      serviced = true;
-      String value;
-      if (strlen(event_item.key) == 0) {       // If did not specify Key
-        value = buData;
-      } else {                                 // If specified Key, need to parse Key/Value from JSON data
-        String sData = buData;
+      serviced = true;                         // This topic is subscribed by us, so serve it
+      String sData = buData;                   // sData will be destroyed by JsonParser
+      char* value = nullptr;
+      if (strlen(event_item.key) == 0) {       // If no key specified
+        value = (char*)buData.c_str();         // {"DS18B20":{"Id":"0000048EC44C","Temperature":23.3}}
+      } else {                                 // If key specified, need to parse Key/Value from JSON data
         JsonParser parser((char*)sData.c_str());
         JsonParserObject jsonData = parser.getRootObject();
-        if (!jsonData) break;                  // Failed to parse JSON data, ignore this message.
+        if (!jsonData) { break; }              // Failed to parse JSON data, ignore this message.
 
-        String key1 = event_item.key;
-        String key2;
-
-        int dot;
-        if ((dot = key1.indexOf('.')) > 0) {
-          key2 = key1.substring(dot+1);
-          key1 = key1.substring(0, dot);
-          JsonParserToken value_tok = jsonData[key1.c_str()].getObject()[key2.c_str()];
-          if (!value_tok) break;               // Failed to get the key/value, ignore this message.
-          value = value_tok.getStr();
-          // if (!jsonData[key1][key2].success()) break;   //Failed to get the key/value, ignore this message.
-          // value = (const char *)jsonData[key1][key2];
-        } else {
-          JsonParserToken value_tok = jsonData[key1.c_str()];
-          if (!value_tok) break;               // Failed to get the key/value, ignore this message.
-          value = value_tok.getStr();
-          // if (!jsonData[key1].success()) break;
-          // value = (const char *)jsonData[key1];
+        char ckey1[strlen(event_item.key)+1];
+        strcpy(ckey1, event_item.key);         // DS18B20.Temperature
+        char* ckey2 = strchr(ckey1, '.');
+        if (ckey2 != nullptr) {                // .Temperature
+          *ckey2++ = '\0';                     // Temperature and ckey1 becomes DS18B20
+          JsonParserToken val = jsonData[ckey1].getObject()[ckey2];
+          if (val) { 
+            value = (char*)val.getStr();       // 23.3
+          }
+        } else {                               // DS18B20
+          JsonParserToken val = jsonData[ckey1];
+          if (val) { 
+            value = (char*)val.getStr();       // \0
+          }
         }
       }
-      value.trim();
-      bool quotes = (value[0] != '{');
-      Response_P(PSTR("{\"Event\":{\"%s\":%s%s%s}}"), event_item.event, (quotes)?"\"":"", value.c_str(), (quotes)?"\"":"");
-      RulesProcessEvent(ResponseData());
+      if (value) {
+        Trim(value);
+        bool quotes = (value[0] != '{');
+        Response_P(PSTR("{\"Event\":{\"%s\":%s%s%s}}"), event_item.event, (quotes)?"\"":"", value, (quotes)?"\"":"");
+        RulesProcessEvent(ResponseData());
+      }
     }
   }
   return serviced;
@@ -1591,10 +1586,8 @@ bool findNextOperator(char * &pointer, int8_t &op)
  *      true    - succeed
  *      false   - failed
  */
-float calculateTwoValues(float v1, float v2, uint8_t op)
-{
-  switch (op)
-  {
+float calculateTwoValues(float v1, float v2, uint8_t op) {
+  switch (op) {
     case EXPRESSION_OPERATOR_ADD:
       return v1 + v2;
     case EXPRESSION_OPERATOR_SUBTRACT:
@@ -1606,7 +1599,7 @@ float calculateTwoValues(float v1, float v2, uint8_t op)
     case EXPRESSION_OPERATOR_MODULO:
       return (0 == v2) ? 0 : (int(v1) % int(v2));
     case EXPRESSION_OPERATOR_POWER:
-      return FastPrecisePow(v1, v2);
+      return FastPrecisePowf(v1, v2);
   }
   return 0;
 }
@@ -1624,7 +1617,7 @@ float calculateTwoValues(float v1, float v2, uint8_t op)
  *      expression  - The expression to be evaluated
  *      len         - Length of the expression
  * Return:
- *      float      - result.
+ *      float       - result
  *      0           - if the expression is invalid
  * An example:
  * MEM1 = 3, MEM2 = 6, VAR2 = 15, VAR10 = 80
@@ -1643,64 +1636,96 @@ float calculateTwoValues(float v1, float v2, uint8_t op)
  *  1             %                                   3
  *  2             +                                   1
  *  3             /                                   2
+ * Results in:
+ *      (10 + VAR2 ^2) = 235
+ *  (MEM1 * 235 - 100) = 605
+ *          (2 + MEM2) = 8
+ *            605 % 10 = 5
+ *            3.14 * 5 = 15.7
+ *  VAR10 / 8 = 80 / 8 = 10
+ *           15.7 + 10 = 25.7 <== end result
  */
-float evaluateExpression(const char * expression, unsigned int len)
-{
+float evaluateExpression(const char * expression, unsigned int len) {
   char expbuf[len + 1];
   memcpy(expbuf, expression, len);
   expbuf[len] = '\0';
   char * scan_pointer = expbuf;
 
-  LinkedList<float> object_values;
-  LinkedList<int8_t> operators;
-  int8_t op;
+  float object_values[21];
+  int8_t operators[20];
   float va;
-  //Find and add the value of first object
+  // Find and add the value of first object
   if (findNextObjectValue(scan_pointer, va)) {
-    object_values.add(va);
+    object_values[0] = va;
   } else {
     return 0;
   }
-  while (*scan_pointer)
-  {
+
+  uint32_t operators_size = 0;
+  int8_t op;
+  while (*scan_pointer) {
     if (findNextOperator(scan_pointer, op)
         && *scan_pointer
         && findNextObjectValue(scan_pointer, va))
     {
-      operators.add(op);
-      object_values.add(va);
+      operators[operators_size++] = op;
+      object_values[operators_size] = va;
     } else {
-      //No operator followed or no more object after this operator, we done.
+      // No operator followed or no more object after this operator, we done.
       break;
+    }
+    if (operators_size >= 20) {
+      AddLog(LOG_LEVEL_ERROR, PSTR("RUL: Too many arguments"));
+      return 0;
     }
   }
 
-  //Going to evaluate the whole expression
-  //Calculate by order of operator priorities. Looking for all operators with specified priority (from High to Low)
-  for (int32_t priority = MAX_EXPRESSION_OPERATOR_PRIORITY; priority>0; priority--) {
+//  AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: Expression '%s'"), expbuf);
+
+  // Going to evaluate the whole expression
+  // Calculate by order of operator priorities. Looking for all operators with specified priority (from High to Low)
+  for (int32_t priority = MAX_EXPRESSION_OPERATOR_PRIORITY; priority > 0; priority--) {
     int index = 0;
-    while (index < operators.size()) {
-      if (priority == pgm_read_byte(kExpressionOperatorsPriorities + operators.get(index))) {     //need to calculate the operator first
-        //get current object value and remove the next object with current operator
-        va = calculateTwoValues(object_values.get(index), object_values.remove(index + 1), operators.remove(index));
-        //Replace the current value with the result
-        object_values.set(index, va);
+    while (index < operators_size) {
+      if (priority == pgm_read_byte(kExpressionOperatorsPriorities + operators[index])) {  // Need to calculate the operator first
+        // Get current object value and remove the next object with current operator
+        va = calculateTwoValues(object_values[index], object_values[index + 1], operators[index]);
+        uint32_t i = index;
+        while (i <= operators_size) {
+          operators[i++] = operators[i];           // operators.remove(index)
+          object_values[i] = object_values[i +1];  // object_values.remove(index + 1)
+        }
+        operators_size--;
+        object_values[index] =  va;                // Replace the current value with the result
+
+//        AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: Intermediate '%4_f'"), &object_values[index]);
+
       } else {
         index++;
       }
     }
   }
-  return object_values.get(0);
+
+//  AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: Result '%4_f'"), &object_values[0]);
+
+  return object_values[0];
 }
 #endif  // USE_EXPRESSION
 
 #ifdef  SUPPORT_IF_STATEMENT
-void CmndIf(void)
-{
+/********************************************************************************************/
+/*
+ * Process an if command
+ * Example:
+ * rule1 on event#test do backlog status 1; status 2; if (var1==10 AND var3==9 OR var4==8) status 3;status 4 endif; status 5; status 6 endon
+ * 
+ * Notice:
+ * In case of "if" is true commands ``status 3`` and ``status 4`` will be inserted into the backlog between ``status 2`` and ``status 5``
+ */
+void CmndIf(void) {
   if (XdrvMailbox.data_len > 0) {
-    char parameters[XdrvMailbox.data_len+1];
-    memcpy(parameters, XdrvMailbox.data, XdrvMailbox.data_len);
-    parameters[XdrvMailbox.data_len] = '\0';
+    char parameters[XdrvMailbox.data_len +1];
+    strcpy(parameters, XdrvMailbox.data);
     ProcessIfStatement(parameters);
   }
   ResponseCmndDone();
@@ -1875,58 +1900,75 @@ bool findNextLogicObjectValue(char * &pointer, bool &value)
  * Return:
  *      boolean     - the value of logical expression
  */
-bool evaluateLogicalExpression(const char * expression, int len)
-{
+bool evaluateLogicalExpression(const char * expression, int len) {
   //Make a copy first
   char expbuff[len + 1];
   memcpy(expbuff, expression, len);
   expbuff[len] = '\0';
-
-  //AddLog(LOG_LEVEL_DEBUG, PSTR("EvalLogic: |%s|"), expbuff);
   char * pointer = expbuff;
-  LinkedList<bool> values;
-  LinkedList<int8_t> logicOperators;
+
+  bool values[21];
+  int8_t logicOperators[20];
+
   //Find first comparison expression
   bool bValue;
   if (findNextLogicObjectValue(pointer, bValue)) {
-    values.add(bValue);
+    values[0] = bValue;
   } else {
     return false;
   }
+
+  uint32_t logicOperators_size = 0;
   int8_t op;
   while (*pointer) {
     if (findNextLogicOperator(pointer, op)
       && (*pointer) && findNextLogicObjectValue(pointer, bValue))
     {
-      logicOperators.add(op);
-      values.add(bValue);
+      logicOperators[logicOperators_size++] = op;
+      values[logicOperators_size] = bValue;
     } else {
       break;
     }
+    if (logicOperators_size >= 20) {
+      AddLog(LOG_LEVEL_ERROR, PSTR("RUL: Too many arguments"));
+      return false;
+    }
   }
-  //Calculate all "AND" first
+
+  // Calculate all "AND" first
   int index = 0;
-  while (index < logicOperators.size()) {
-    if (logicOperators.get(index) == LOGIC_OPERATOR_AND) {
-      values.set(index, values.get(index) && values.get(index+1));
-      values.remove(index + 1);
-      logicOperators.remove(index);
+  while (index < logicOperators_size) {
+    if (logicOperators[index] == LOGIC_OPERATOR_AND) {
+      values[index] &= values[index +1];
+      uint32_t i = index;
+      while (i <= logicOperators_size) {
+        logicOperators[i++] = logicOperators[i];  // logicOperators.remove(index);
+        values[i] = values[i +1];                 // values.remove(index + 1);
+      }
+      logicOperators_size--;
     } else {
       index++;
     }
   }
-  //Then, calculate all "OR"
+  // Then, calculate all "OR"
   index = 0;
-  while (index < logicOperators.size()) {
-    if (logicOperators.get(index) == LOGIC_OPERATOR_OR) {
-      values.set(index, values.get(index) || values.get(index+1));
-      values.remove(index + 1);
-      logicOperators.remove(index);
+  while (index < logicOperators_size) {
+    if (logicOperators[index] == LOGIC_OPERATOR_OR) {
+      values[index] |= values[index +1];
+      uint32_t i = index;
+      while (i <= logicOperators_size) {
+        logicOperators[i++] = logicOperators[i];  // logicOperators.remove(index);
+        values[i] = values[i +1];                 // values.remove(index + 1);
+      }
+      logicOperators_size--;
     } else {
       index++;
     }
   }
-  return values.get(0);
+
+//  AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: Expression '%s' = %d"), expbuff, values[0]);
+
+  return values[0];
 }
 
 /********************************************************************************************/
@@ -2008,7 +2050,6 @@ void ExecuteCommandBlock(const char * commands, int len)
   memcpy(cmdbuff, commands, len);
   cmdbuff[len] = '\0';
 
-  //AddLog(LOG_LEVEL_DEBUG, PSTR("ExecCmd: |%s|"), cmdbuff);
   char oneCommand[len + 1];     //To put one command
   int insertPosition = 0;       //When insert into backlog, we should do it by 0, 1, 2 ...
   char * pos = cmdbuff;
@@ -2049,17 +2090,18 @@ void ExecuteCommandBlock(const char * commands, int len)
     //Going to insert the command into backlog
     char* blcommand = oneCommand;
     Trim(blcommand);
+
+//    AddLog(LOG_LEVEL_DEBUG, PSTR("DBG: Position %d, Command '%s'"), insertPosition, blcommand);
+
     if (strlen(blcommand)) {
       //Insert into backlog
       char* temp = (char*)malloc(strlen(blcommand)+1);
       if (temp != nullptr) {
         strcpy(temp, blcommand);
-        char* &elem = backlog.insertAt(insertPosition);
+        char* &elem = backlog.insertAt(insertPosition++);
         elem = temp;
       }
-      insertPosition++;
     }
-
   }
   return;
 }
