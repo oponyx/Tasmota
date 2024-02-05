@@ -154,6 +154,7 @@ class Matter_Plugin_Root : Matter_Plugin
         var nocl = TLV.Matter_TLV_array() # NOCs, p.711
         var fabs = ctx.fabric_filtered ? [session.get_fabric()] : self.device.sessions.active_fabrics()
         for loc_fabric: fabs
+          if loc_fabric.is_marked_for_deletion()    continue end    # fabric is scheduled for deletion
           if loc_fabric == nil    continue  end
           var nocs = nocl.add_struct(nil)
           nocs.add_TLV(1, TLV.B2, loc_fabric.get_noc())      # NOC
@@ -166,12 +167,13 @@ class Matter_Plugin_Root : Matter_Plugin
         var fabs = ctx.fabric_filtered ? [session.get_fabric()] : self.device.sessions.active_fabrics()
         for loc_fabric: fabs
           if loc_fabric == nil    continue  end
+          if loc_fabric.is_marked_for_deletion()    continue end    # fabric is scheduled for deletion
           var root_ca_tlv = TLV.parse(loc_fabric.get_ca())
           var fab = fabrics.add_struct(nil)            # encoding see p.303
           fab.add_TLV(1, TLV.B2, root_ca_tlv.findsubval(9)) # RootPublicKey
           fab.add_TLV(2, TLV.U2, loc_fabric.get_admin_vendor())      # VendorID
-          fab.add_TLV(3, TLV.U8, loc_fabric.get_fabric_id())            # FabricID
-          fab.add_TLV(4, TLV.U8, loc_fabric.get_device_id())          # NodeID
+          fab.add_TLV(3, TLV.U8, loc_fabric.get_fabric_id_as_int64())            # FabricID
+          fab.add_TLV(4, TLV.U8, loc_fabric.get_device_id_as_int64())          # NodeID
           fab.add_TLV(5, TLV.UTF1, loc_fabric.get_fabric_label())    # Label
           fab.add_TLV(0xFE, TLV.U2, loc_fabric.get_fabric_index())    # idx
         end
@@ -305,14 +307,20 @@ class Matter_Plugin_Root : Matter_Plugin
 
     elif cluster == 0x001D              # ========== Descriptor Cluster 9.5 p.453 ==========
 
+      # overwrite ClientList
+      if   attribute == 0x0002          # ---------- ClientList / list[cluster-id] ----------
+        var pl = TLV.Matter_TLV_array()
+        # from connectedhome reference implementation
+        pl.add_TLV(nil, TLV.U2, 0x001F)     # Access Control Cluster
+        return pl        
       # overwrite PartsList
-      if   attribute == 0x0003          # ---------- PartsList / list[endpoint-no]----------
+      elif attribute == 0x0003          # ---------- PartsList / list[endpoint-no]----------
         var pl = TLV.Matter_TLV_array()
         var eps = self.device.get_active_endpoints(true)
         var disable_bridge_mode = self.device.disable_bridge_mode
         for ep: eps
           # if bridge mode is disabled, don't announce Aggregatore (above 0xFF00)
-          if !disable_bridge_mode || ep < matter.AGGREGATOR_ENDPOINT
+          if !disable_bridge_mode || ep != matter.AGGREGATOR_ENDPOINT
             pl.add_TLV(nil, TLV.U2, ep)     # add each endpoint
           end
         end
@@ -547,13 +555,14 @@ class Matter_Plugin_Root : Matter_Plugin
         # tasmota.log("MTR: fabric=" + matter.inspect(session._fabric), 3)
         # tasmota.log("MTR: ------------------------------------------", 3)
         new_fabric.log_new_fabric()        # log that we registered a new fabric
+        new_fabric.assign_fabric_index()
         # create NOCResponse
         # 0=StatusCode
         # 1=FabricIndex (1-254) (opt)
         # 2=DebugText (opt)
         var nocr = TLV.Matter_TLV_struct()
         nocr.add_TLV(0, TLV.U1, matter.SUCCESS)   # Status
-        nocr.add_TLV(1, TLV.U1, 1)   # fabric-index
+        nocr.add_TLV(1, TLV.U1, new_fabric.get_fabric_index())   # fabric-index
         ctx.command = 0x08              # NOCResponse
         return nocr
 
@@ -561,8 +570,16 @@ class Matter_Plugin_Root : Matter_Plugin
         var label = val.findsubval(0)     # Label string max 32
         session.set_fabric_label(label)
         tasmota.log(format("MTR: .          Update fabric '%s' label='%s'", session._fabric.get_fabric_id().copy().reverse().tohex(), str(label)), 3)
-        ctx.status = matter.SUCCESS                  # OK
-        return nil                      # trigger a standalone ack
+        
+        # create NOCResponse
+        # 0=StatusCode
+        # 1=FabricIndex (1-254) (opt)
+        # 2=DebugText (opt)
+        var nocr = TLV.Matter_TLV_struct()
+        nocr.add_TLV(0, TLV.U1, matter.SUCCESS)   # Status
+        nocr.add_TLV(1, TLV.U1, session.get_fabric().get_fabric_index())   # fabric-index
+        ctx.command = 0x08              # NOCResponse
+        return nocr
 
       elif command == 0x000A            # ---------- RemoveFabric ----------
         var index = val.findsubval(0)     # FabricIndex
@@ -572,8 +589,18 @@ class Matter_Plugin_Root : Matter_Plugin
           if fab.get_fabric_index() == index
             # tasmota.log("MTR: removing fabric " + fab.get_fabric_id().copy().reverse().tohex(), 2)
             # defer actual removal to send a response
+            fab.mark_for_deletion()       # this should not appear anymore in the list
             tasmota.set_timer(2000, def () self.device.remove_fabric(fab) end)
-            return true                 # Ok
+
+            # create NOCResponse
+            # 0=StatusCode
+            # 1=FabricIndex (1-254) (opt)
+            # 2=DebugText (opt)
+            var nocr = TLV.Matter_TLV_struct()
+            nocr.add_TLV(0, TLV.U1, matter.SUCCESS)   # Status
+            nocr.add_TLV(1, TLV.U1, index)   # fabric-index
+            ctx.command = 0x08              # NOCResponse
+            return nocr
           end
         end
         tasmota.log("MTR: RemoveFabric fabric("+str(index)+") not found", 2)
