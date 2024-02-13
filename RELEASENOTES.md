@@ -116,9 +116,10 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 
 [Complete list](BUILDS.md) of available feature and sensors.
 
-## Changelog v13.3.0.4
+## Changelog v13.3.0.5
 ### Added
 - Command ``TimedPower<index> <milliseconds>[,ON|OFF|TOGGLE|BLINK]`` executes ``Power<index> [ON|OFF|TOGGLE|BLINK] `` and after <millisecond> executes ``Power<index> [OFF|ON|TOGGLE|OFF]``
+- Command ``SetOption158`` to publish or suppress ModbusReceived MQTT messages [#20678](https://github.com/arendst/Tasmota/issues/20678)
 - Display of active drivers using command ``status 4``
 - GPIO Viewer to see realtime GPIO states. Enable with define USE_GPIO_VIEWER
 - GPIO Viewer user selection of assets website now defaults to `https://ota.tasmota.com/tasmota|tasmota32/gpio_viewer/assets`
@@ -135,6 +136,7 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 - ESP32 MI BLE support for Xiaomi LYWSD02MMC [#20381](https://github.com/arendst/Tasmota/issues/20381)
 - ESP32 support for Shelly Plus Add-On using DS18x20 or DHT11/AM2301/DHT21/DHT22/AM2302/AM2321/SI7021 on GPIO0/1 [#20580](https://github.com/arendst/Tasmota/issues/20580)
 - ESP32 MI32 Legacy initial support for sensors using BTHOME packet format [#20625](https://github.com/arendst/Tasmota/issues/20625)
+- ESP32 Core3 support for SPI ethernet on DM9051, W5500 and KSZ8851
 - ESP32-C3 support for GPIO11 [#18350](https://github.com/arendst/Tasmota/issues/18350)
 - Berry GPIO viewer initial version using async webserver [#20416](https://github.com/arendst/Tasmota/issues/20416)
 - Berry `introspect.set()` for class attributes [#20339](https://github.com/arendst/Tasmota/issues/20339)
@@ -160,8 +162,10 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 - HASPmota type `chart` [#20372](https://github.com/arendst/Tasmota/issues/20372)
 - HASPmota support for `min` and `max` attribute in `slider` [#20582](https://github.com/arendst/Tasmota/issues/20582)
 - Matter support for password for remote Tasmota devices [#20296](https://github.com/arendst/Tasmota/issues/20296)
+- Matter add human readable names for TimeSync cluster [#20666](https://github.com/arendst/Tasmota/issues/20666)
 
 ### Breaking Changed
+- ESP32 LVGL library from v8.3.11 to v9.0.0, some small breaking changes in C, none in HASPmota [#20659](https://github.com/arendst/Tasmota/issues/20659)
 - Refactoring of Berry `animate` module for WS2812 Leds [#20236](https://github.com/arendst/Tasmota/issues/20236)
 - Matter aggregator relocated to endpoint 1 for Google compatibility, may break existing associations [#20654](https://github.com/arendst/Tasmota/issues/20654)
 
@@ -182,6 +186,9 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 - Webcam tweaks [#20451](https://github.com/arendst/Tasmota/issues/20451)
 - IP stack compatible with new Core3 IPv6 implementation [#20509](https://github.com/arendst/Tasmota/issues/20509)
 - Refactored Pio filesystem download script [#20544](https://github.com/arendst/Tasmota/issues/20544)
+- Matter improve `MtrInfo` [#20686](https://github.com/arendst/Tasmota/issues/20686)
+- Matter redirects for Advanced Matter configuration UI [#20690](https://github.com/arendst/Tasmota/issues/20690)
+- Matter implement auto-attributes [#20694](https://github.com/arendst/Tasmota/issues/20694)
 
 ### Fixed
 - CVE-2021-36603 Cross Site Scripting (XSS) vulnerability [#12221](https://github.com/arendst/Tasmota/issues/12221)
@@ -201,6 +208,8 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 - Berry C mapping, raise an error if too many arguments are sent [#20604](https://github.com/arendst/Tasmota/issues/20604)
 - Matter Contact sensor was not triggering any update [#20232](https://github.com/arendst/Tasmota/issues/20232)
 - Matter support for Alexa [#20545](https://github.com/arendst/Tasmota/issues/20545)
+- Matter error when removing device from Google Home [#20665](https://github.com/arendst/Tasmota/issues/20665)
+- Matter exception when fabrics is not initialized [#20667](https://github.com/arendst/Tasmota/issues/20667)
 
 ### Removed
 - Max number of 30 backlog entries
