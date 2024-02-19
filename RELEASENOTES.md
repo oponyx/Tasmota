@@ -118,13 +118,24 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 
 ## Changelog v13.4.0.1
 ### Added
+- Show calculated heat index if temperature and humidity is available with ``#define USE_HEAT_INDEX`` [#4771](https://github.com/arendst/Tasmota/issues/4771)
+- TasMesh support for LWT messages [#20392](https://github.com/arendst/Tasmota/issues/20392)
+- QMC5883l check for overflow and scale reading [#20643](https://github.com/arendst/Tasmota/issues/20643)
+- HASPmota `p<x>b<y>.delete` to delete an object [#20735](https://github.com/arendst/Tasmota/issues/20735)
+- LVGL and HASPmota typicons font [#20742](https://github.com/arendst/Tasmota/issues/20742)
 
 ### Breaking Changed
 
 ### Changed
+- ESP32 Core3 platform update from 2024.01.12 to 2024.02.10 [#20730](https://github.com/arendst/Tasmota/issues/20730)
+- NeoPool webUI pH alarms (4 & 5) completed (#20743)[#20743](https://github.com/arendst/Tasmota/issues/20743)
 - Berry class `int64` made immutable [#20727](https://github.com/arendst/Tasmota/issues/20727)
 - LVGL make lv_touch_3_buttons more responsive [#20728](https://github.com/arendst/Tasmota/issues/20728)
+- HASPmota fix and improve demo with pixel-perfect fonts [#20734](https://github.com/arendst/Tasmota/issues/20734)
+- HASPmota more attributes [#20744](https://github.com/arendst/Tasmota/issues/20744)
 
 ### Fixed
+- Shutter inverted using internal commands [#20752](https://github.com/arendst/Tasmota/issues/20752)
+- ESP32 PWM activity on unconfigured PWM GPIOs [#20732](https://github.com/arendst/Tasmota/issues/20732)
 
 ### Removed
