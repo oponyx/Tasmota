@@ -734,6 +734,8 @@ https://rya.nc/tasmota-fingerprint.html"
 //    #define INA3221_ADDRESS1                     // allow to change the 1st address to search for INA3221 to 0x41..0x43
 //    #define INA3221_MAX_COUNT                    // change the number of devices to search for (default 4).
 //                                                 // Both settings together allow to limit searching for INA3221 to only a subset of addresses
+//    #define  INA3221_CALC_CHARGE_AH              // calculate charge in Ah
+//    #define  INA3221_CALC_ENERGY_WH              // calculate energy in Wh
 //  #define USE_PMSA003I                           // [I2cDriver78] Enable PMSA003I Air Quality Sensor (I2C address 0x12) (+1k8 code)
 //  #define USE_GDK101                             // [I2cDriver79] Enable GDK101 sensor (I2C addresses 0x18 - 0x1B) (+1k2 code)
 //    #define GDK101_SHOW_FW_VERSION
@@ -1226,11 +1228,10 @@ https://rya.nc/tasmota-fingerprint.html"
     #define BE_LV_WIDGET_SLIDER
     #define BE_LV_WIDGET_SWITCH
     #define BE_LV_WIDGET_TABLE
-    #define BE_LV_WIDGET_TEXTAREA
+    // #define BE_LV_WIDGET_TEXTAREA
 
     #define BE_LV_WIDGET_ANIMIMG
     #define BE_LV_WIDGET_CHART
-    #define BE_LV_WIDGET_COLORWHEEL
     #define BE_LV_WIDGET_IMGBTN       // LVGL 8
     #define BE_LV_WIDGET_IMAGEBUTTON  // LVGL 9
     // #define BE_LV_WIDGET_KEYBOARD
@@ -1240,7 +1241,7 @@ https://rya.nc/tasmota-fingerprint.html"
     #define BE_LV_WIDGET_MSGBOX
     #define BE_LV_WIDGET_QRCODE
     #define BE_LV_WIDGET_SCALE
-    #define BE_LV_WIDGET_SPINBOX
+    // #define BE_LV_WIDGET_SPINBOX
     #define BE_LV_WIDGET_SPINNER
     #define BE_LV_WIDGET_SPANGROUP
     #define BE_LV_WIDGET_SPAN
