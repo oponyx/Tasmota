@@ -1941,7 +1941,7 @@ void HandleWifiConfiguration(void) {
       AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_WIFI D_CONNECTING_TO_AP " %s " D_AS " %s ..."),
         SettingsText(SET_STASSID1), TasmotaGlobal.hostname);
 
-      WiFi.begin(SettingsText(SET_STASSID1), SettingsText(SET_STAPWD1));
+      WiFiHelper::begin(SettingsText(SET_STASSID1), SettingsText(SET_STAPWD1));
 
       WebRestart(2);
     } else {
@@ -2439,11 +2439,11 @@ void HandleInformation(void) {
   }
   if (Settings->flag4.network_wifi) {
     int32_t rssi = WiFi.RSSI();
-    WSContentSend_P(PSTR("}1" D_AP "%d " D_INFORMATION "}2" D_SSID " %s<br>" D_RSSI " %d%%, %d dBm<br>" D_MODE " 11%c<br>" D_CHANNEL " %d<br>" D_BSSID " %s"), 
+    WSContentSend_P(PSTR("}1" D_AP "%d " D_INFORMATION "}2" D_SSID " %s<br>" D_RSSI " %d%%, %d dBm<br>" D_MODE " %s<br>" D_CHANNEL " %d<br>" D_BSSID " %s"), 
       Settings->sta_active +1,
       SettingsTextEscaped(SET_STASSID1 + Settings->sta_active).c_str(),
       WifiGetRssiAsQuality(rssi), rssi,
-      pgm_read_byte(&kWifiPhyMode[WiFi.getPhyMode() & 0x3]),
+      WifiGetPhyMode().c_str(),
       WiFi.channel(),
       WiFi.BSSIDstr().c_str());
     WSContentSeparatorIFat();
@@ -2459,7 +2459,7 @@ void HandleInformation(void) {
     }
 #endif  // USE_IPV6
     if (static_cast<uint32_t>(WiFi.localIP()) != 0) {
-      WSContentSend_P(PSTR("}1" D_MAC_ADDRESS "}2%s"), WiFi.macAddress().c_str());
+      WSContentSend_P(PSTR("}1" D_MAC_ADDRESS "}2%s"), WiFiHelper::macAddress().c_str());
       WSContentSend_P(PSTR("}1" D_IP_ADDRESS " (WiFi)}2%_I"), (uint32_t)WiFi.localIP());
     }
     show_hr = true;

@@ -149,6 +149,7 @@ uDisplay::uDisplay(char *lp) : Renderer(800, 600) {
   rot_t[3] = 3;
   epcoffs_full = 0;
   epcoffs_part = 0;
+  interface = 0;
 
   for (uint32_t cnt = 0; cnt < MAX_LUTS; cnt++) {
     lut_cnt[cnt] = 0;
@@ -687,6 +688,19 @@ uDisplay::uDisplay(char *lp) : Renderer(800, 600) {
     ep_mode = 2;
   }
 
+
+#ifdef USE_ESP32_S3
+void UfsCheckSDCardInit(void);
+
+  if (spec_init == _UDSP_SPI) {
+    // special case, assuming sd card and display on same spi bus
+    // end spi in case it was running
+    SPI.end();
+    // reininit SD card
+    UfsCheckSDCardInit();
+  }
+#endif
+
 #ifdef UDSP_DEBUG
   Serial.printf("Device : %s\n", dname);
   Serial.printf("xs : %d\n", gxs);
@@ -1014,6 +1028,13 @@ exit:
 Renderer *uDisplay::Init(void) {
   extern bool UsePSRAM(void);
 
+  if (!interface) {   // no valid configuration, abort
+    #ifdef UDSP_DEBUG
+    Serial.printf("Dsp Init no valid configuration\n");
+    #endif
+    return NULL;
+  }
+
   #ifdef UDSP_DEBUG
     Serial.printf("Dsp Init 1 start \n");
   #endif
@@ -1141,6 +1162,12 @@ Renderer *uDisplay::Init(void) {
 
   if (interface == _UDSP_RGB) {
 #ifdef USE_ESP32_S3
+    if (!UsePSRAM())  {        // RGB is not supported on S3 without PSRAM
+      #ifdef UDSP_DEBUG
+      Serial.printf("Dsp RGB requires PSRAM, abort\n");
+      #endif
+      return NULL;
+    }
 
     if (bpanel >= 0) {
       analogWrite(bpanel, 32);
@@ -1731,6 +1758,9 @@ void uDisplay::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
 
   if (interface == _UDSP_RGB) {
   #ifdef USE_ESP32_S3
+    if (lvgl_param.swap_color) {
+      color = color << 8 | color >> 8;
+    }
     if (cur_rot > 0) {
       while (h--) {
         drawPixel_RGB(x , y , color);
@@ -1801,6 +1831,9 @@ void uDisplay::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
 
   if (interface == _UDSP_RGB) {
 #ifdef USE_ESP32_S3
+    if (lvgl_param.swap_color) {
+      color = color << 8 | color >> 8;
+    }
     if (cur_rot > 0) {
       while (w--) {
         drawPixel_RGB(x , y , color);
@@ -2390,6 +2423,9 @@ void uDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
 #ifdef USE_ESP32_S3
   if (interface == _UDSP_RGB) {
+    if (lvgl_param.swap_color) {
+      color = color << 8 | color >> 8;
+    }
     drawPixel_RGB(x, y, color);
     return;
   }
