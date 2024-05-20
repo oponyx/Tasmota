@@ -42,9 +42,9 @@ const uint8_t WIFI_RETRY_OFFSET_SEC = WIFI_RETRY_SECONDS;  // seconds
 
 #include <ESP8266WiFi.h>                   // Wifi, MQTT, Ota, WifiManager
 #include "lwip/dns.h"
-#if ESP_IDF_VERSION_MAJOR >= 5
+#ifdef ESP32
   #include "esp_netif.h"
-#endif
+#endif  // ESP32
 
 int WifiGetRssiAsQuality(int rssi) {
   int quality = 0;
@@ -1159,7 +1159,9 @@ void WifiDisable(void) {
 void EspRestart(void) {
   ResetPwm();
   WifiShutdown(true);
+#ifndef FIRMWARE_MINIMAL
   CrashDumpClear();           // Clear the stack dump in RTC
+#endif // FIRMWARE_MINIMAL
 
 #ifdef CONFIG_IDF_TARGET_ESP32C3
   GpioForceHoldRelay();       // Retain the state when the chip or system is reset, for example, when watchdog time-out or Deep-sleep
@@ -1468,6 +1470,19 @@ void WifiEvents(arduino_event_t *event) {
              event->event_id == ARDUINO_EVENT_ETH_GOT_IP6 ? "ETH" : "WIF",
              IPv6isLocal(addr) ? PSTR("Local") : PSTR("Global"), addr.toString(true).c_str());
     }
+    break;
+
+    case ARDUINO_EVENT_WIFI_STA_CONNECTED:
+      // workaround for the race condition in LWIP, see https://github.com/espressif/arduino-esp32/pull/9016#discussion_r1451774885
+      {
+        uint32_t i = 5;   // try 5 times only
+        while (esp_netif_create_ip6_linklocal(get_esp_interface_netif(ESP_IF_WIFI_STA)) != ESP_OK) {
+          delay(1);
+          if (i-- == 0) {
+            break;
+          }
+        }
+      }
     break;
 #endif // USE_IPV6
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:

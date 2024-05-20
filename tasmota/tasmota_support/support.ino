@@ -22,6 +22,34 @@ extern struct rst_info resetInfo;
 }
 
 /*********************************************************************************************\
+ * ESP32 Watchdog
+\*********************************************************************************************/
+#ifdef ESP32
+// Watchdog - yield() resets the watchdog
+
+extern "C" void __yield(void);              // original function from Arduino Core
+extern "C"
+void yield(void) {
+  __yield();
+  feedLoopWDT();
+}
+
+// patching delay(uint32_t ms)
+extern "C" void __real_delay(uint32_t ms);  // original function from Arduino Core
+
+extern "C" void __wrap_delay(uint32_t ms) {
+#ifdef USE_ESP32_WDT
+  if (ms) { feedLoopWDT(); }
+  __real_delay(ms);
+  feedLoopWDT();
+#else
+  __real_delay(ms);
+#endif
+}
+
+#endif // ESP32
+
+/*********************************************************************************************\
  * Watchdog extension (https://github.com/esp8266/Arduino/issues/1532)
 \*********************************************************************************************/
 
@@ -611,16 +639,18 @@ String HexToString(uint8_t* data, uint32_t length) {
 // Converts a Hex string (case insensitive) into an array of bytes
 // Returns the number of bytes in the array, or -1 if an error occured
 // The `out` buffer must be at least half the size of hex string
-int32_t HexToBytes(const char* hex, uint8_t* out, size_t* outLen) {
+int32_t HexToBytes(const char* hex, uint8_t* out, size_t out_len) {
   size_t len = strlen_P(hex);
-  *outLen = 0;
   if (len % 2 != 0) {
     return -1;
   }
 
-  size_t outLength = len / 2;
+  size_t bytes_out = len / 2;
+  if (bytes_out < out_len) {
+    bytes_out = out_len;
+  }
   
-  for(size_t i = 0; i < outLength; i++) {
+  for (size_t i = 0; i < bytes_out; i++) {
     char byte[3];
     byte[0] = hex[i*2];
     byte[1] = hex[i*2 + 1];
@@ -629,11 +659,11 @@ int32_t HexToBytes(const char* hex, uint8_t* out, size_t* outLen) {
     char* endPtr;
     out[i] = strtoul(byte, &endPtr, 16);
     
-    if(*endPtr != '\0') {
+    if (*endPtr != '\0') {
       return -1;
     }
   }
-  return outLength;
+  return bytes_out;
 }
 
 String UrlEncode(const String& text) {

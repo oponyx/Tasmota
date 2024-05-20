@@ -28,7 +28,7 @@
  * Use online command StateText to translate ON, OFF, HOLD and TOGGLE.
  * Use online command Prefix to translate cmnd, stat and tele.
  *
- * Updated until v9.4.0.1 - Last update 27.03.2024
+ * Updated until v9.4.0.1 - Last update 26.04.2024
 \*********************************************************************/
 
 #define LANGUAGE_MODULE_NAME         // Enable to display "Module Generic" (ie Spanish), Disable to display "Generic Module" (ie English)
@@ -76,6 +76,7 @@
 #define D_COMMAND              "Comando"
 #define D_CONNECTED            "Connesso"
 #define D_CORS_DOMAIN          "Dominio CORS"
+#define D_COLOR                "Color"
 #define D_COUNT                "Conteggio"
 #define D_COUNTER              "Contatore"
 #define D_CT_POWER             "Alimentazione CT"
@@ -789,6 +790,8 @@
 #define D_GPIO_RN2XX3_TX                "RN2XX3 - TX"
 #define D_GPIO_RN2XX3_RX                "RN2XX3 - RX"
 #define D_GPIO_RN2XX3_RST               "RN2XX3 - Rst"
+#define D_GPIO_ASR650X_TX               "ASR650X - Tx"
+#define D_GPIO_ASR650X_RX               "ASR650X - Rx"
 #define D_GPIO_LORA_CS                  "LoRa - CS"
 #define D_GPIO_LORA_RST                 "LoRa - Rst"
 #define D_GPIO_LORA_BUSY                "LoRa - Busy"
@@ -908,6 +911,7 @@
 #define D_SENSOR_ETH_PHY_MDC            "ETH - MDC"
 #define D_SENSOR_ETH_PHY_MDIO           "ETH - MDIO"
 #define D_SENSOR_TCP_TXD                "TCP - TX"
+#define D_SENSOR_TCP_TXD_EN             "TCP - TX En"
 #define D_SENSOR_TCP_RXD                "TCP - RX"
 #define D_SENSOR_IEM3000_TX             "iEM3000 - TX"
 #define D_SENSOR_IEM3000_RX             "iEM3000 - RX"
