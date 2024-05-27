@@ -122,14 +122,16 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 ## Changelog v14.0.0.1
 ### Added
 - Optional command ``WebRun`` (as WebQuery extension) [#21364](https://github.com/arendst/Tasmota/issues/21364)
-- Knx dimmer and color [#21434](https://github.com/arendst/Tasmota/issues/21434)
+- Support for Knx dimmer and color [#21434](https://github.com/arendst/Tasmota/issues/21434)
 - Enabled watchdog for ESP32 and variants [#21422](https://github.com/arendst/Tasmota/issues/21422)
+- Support for Matter 1.3 Water leak detectors [#21456](https://github.com/arendst/Tasmota/issues/21456)
 
 ### Breaking Changed
 
 ### Changed
 - GPIOViewer from v1.5.2 to v1.5.3
 - On universal display remove default backlight power if a PWM channel is used for backlight
+- Support W5500 SPI ethernet using four SPI GPIOs only without IRQ and RESET
 - ESP32 compiler option from `target-align` to `no-target-align` [#21407](https://github.com/arendst/Tasmota/issues/21407)
 - ESP32 I2S audio improvements [#21433](https://github.com/arendst/Tasmota/issues/21433)
 - Berry binary compiled with gcc [#21426](https://github.com/arendst/Tasmota/issues/21426)
@@ -137,7 +139,11 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 ### Fixed
 - Domoticz re-subscribe on MQTT reconnect. Regression from v13.4.0.3 [#21281](https://github.com/arendst/Tasmota/issues/21281)
 - Watchdog restart or freeze if ``displaytext`` is more than 128 characters [#21401](https://github.com/arendst/Tasmota/issues/21401)
+- Wrong timeout in `WebQuery` and `webclient` since Core3 [#21442](https://github.com/arendst/Tasmota/issues/21442)
+- Zigbee crash when removing `ZbName` [#21449](https://github.com/arendst/Tasmota/issues/21449)
 - Avoid connection errors when switching to safeboot to upload OTA firmware [#21428](https://github.com/arendst/Tasmota/issues/21428)
+- ESP32 BLE fix scanning [#21451](https://github.com/arendst/Tasmota/issues/21451)
+- Webradio crash with invalid url [#21446](https://github.com/arendst/Tasmota/issues/21446)
 - Berry Leds matrix alternate more and error about 'bri' attribute [#21431](https://github.com/arendst/Tasmota/issues/21431)
 
 ### Removed
