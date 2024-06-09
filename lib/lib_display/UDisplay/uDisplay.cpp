@@ -290,6 +290,10 @@ uDisplay::uDisplay(char *lp) : Renderer(800, 600) {
               col_type = uCOLOR_BW;
             } else {
               col_type = uCOLOR_COLOR;
+              if (bpp == 16) {
+                fg_col = GetColorFromIndex(fg_col);
+                bg_col = GetColorFromIndex(bg_col);
+              }
             }
             str2c(&lp1, ibuff, sizeof(ibuff));
             if (!strncmp(ibuff, "I2C", 3)) {
@@ -368,11 +372,9 @@ uDisplay::uDisplay(char *lp) : Renderer(800, 600) {
             splash_font = next_val(&lp1);
             splash_size = next_val(&lp1);
             fg_col = next_val(&lp1);
-            if (bpp == 16) {
-              fg_col = GetColorFromIndex(fg_col);
-            }
             bg_col = next_val(&lp1);
             if (bpp == 16) {
+              fg_col = GetColorFromIndex(fg_col);
               bg_col = GetColorFromIndex(bg_col);
             }
             splash_xp = next_val(&lp1);
@@ -1289,6 +1291,7 @@ Renderer *uDisplay::Init(void) {
     esp_lcd_i80_bus_config_t bus_config = {
         .dc_gpio_num = par_rs,
         .wr_gpio_num = par_wr,
+        .clk_src = LCD_CLK_SRC_DEFAULT,
         .bus_width = bus_width,
         .max_transfer_bytes = 32768
     };

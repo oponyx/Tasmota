@@ -482,12 +482,8 @@ int8_t cs;
     bg_color = renderer->bgcol();
     color_type = renderer->color_type();
 
-#ifdef USE_M5STACK_CORE2
-    renderer->SetPwrCB(Core2DisplayPower);
-    renderer->SetDimCB(Core2DisplayDim);
-#endif // USE_M5STACK_CORE2
-
     renderer->DisplayInit(DISPLAY_INIT_MODE, Settings->display_size, inirot, Settings->display_font);
+    renderer->clearDisplay();
 
     Settings->display_width = renderer->width();
     Settings->display_height = renderer->height();
@@ -509,7 +505,7 @@ int8_t cs;
     ApplyDisplayDimmer();
 
 #ifdef SHOW_SPLASH
-    if (!Settings->flag5.display_no_splash) {
+    if (!Settings->flag5.display_no_splash) {  // SetOption135 - (Display & LVGL) force disabling default splash screen
       renderer->Splash();
     }
 #endif // SHOW_SPLASH
@@ -557,7 +553,7 @@ void UDISP_PrintLog(void)
     if (txt != NULL) {
       uint8_t last_row = Settings->display_rows -1;
 
-      renderer->clearDisplay();
+//      renderer->clearDisplay();
       renderer->setTextSize(Settings->display_size);
       renderer->setCursor(0,0);
       for (byte i = 0; i < last_row; i++) {
@@ -579,7 +575,7 @@ void UDISP_Time(void)
 {
   char line[12];
 
-  renderer->clearDisplay();
+//  renderer->clearDisplay();
   renderer->setTextSize(Settings->display_size);
   renderer->setTextFont(Settings->display_font);
   renderer->setCursor(0, 0);
