@@ -221,6 +221,7 @@ enum UserSelectablePins {
   GPIO_RN2XX3_TX, GPIO_RN2XX3_RX, GPIO_RN2XX3_RST,  // RN2XX3 LoRaWan node Serial interface
   GPIO_TCP_TX_EN,                       // TCP to serial bridge, EN pin
   GPIO_ASR650X_TX, GPIO_ASR650X_RX,     // ASR650X LoRaWan node Serial interface
+  GPIO_WOOLIIS_RX,                      // Wooliis Battery capacity monitor Serial RX
   GPIO_SENSOR_END };
 
 // Error as warning to rethink GPIO usage with max 2045
@@ -231,7 +232,7 @@ enum ProgramSelectablePins {
   GPIO_USER,           // User configurable needs to be 2047
   GPIO_MAX };
 
-#define MAX_OPTIONS_A  7                   // Increase if more bits are used from GpioOptionABits
+#define MAX_OPTIONS_A  8                   // Increase if more bits are used from GpioOptionABits
 
 typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
   uint32_t data;                           // Allow bit manipulation using SetOption
@@ -243,7 +244,7 @@ typedef union {                            // Restricted by MISRA-C Rule 18.4 bu
     uint32_t rotary_mi_desk : 1;           // bit 4 (v9.5.0.5)   - Option_A5 - (Rotary) Enable Mi Desk emulation
     uint32_t linkind_support : 1;          // bit 5 (v10.1.0.4)  - Option_A6 - (Light) LinkInd support
     uint32_t shelly_pro : 1;               // bit 6 (v12.2.0.1)  - Option_A7 - (Device) Shelly Pro
-    uint32_t spare07 : 1;                  // bit 7
+    uint32_t ifan04_h : 1;                 // bit 7 (v14.1.0.4)  - Option_A8 - (Device) Sonoff ifan04-H
     uint32_t spare08 : 1;                  // bit 8
     uint32_t spare09 : 1;                  // bit 9
     uint32_t spare10 : 1;                  // bit 10
@@ -489,6 +490,7 @@ const char kSensorNames[] PROGMEM =
   D_GPIO_RN2XX3_TX "|" D_GPIO_RN2XX3_RX "|" D_GPIO_RN2XX3_RST "|"
   D_SENSOR_TCP_TXD_EN "|"
   D_GPIO_ASR650X_TX "|" D_GPIO_ASR650X_RX "|"
+  D_SENSOR_WOOLIIS_RX "|"
   ;
 
 const char kSensorNamesFixed[] PROGMEM =
@@ -509,6 +511,7 @@ const char kSensorNamesFixed[] PROGMEM =
 #define MAX_DINGTIAN_SHIFT  4
 #define MAX_MAGIC_SWITCH_MODES   2
 #define MAX_BL0942_RX    8              // Baudrates 1/5 (4800), 2/6 (9600), 3/7 (19200), 4/8 (38400), Support Positive values only 1..4, Support also negative values 5..8
+#define MAX_CSE7761      2              // Model 1/2 (DUALR3), 2/2 (POWCT)
 
 const uint16_t kGpioNiceList[] PROGMEM = {
   GPIO_NONE,                            // Not used
@@ -886,7 +889,7 @@ const uint16_t kGpioNiceList[] PROGMEM = {
 #endif  // USE_ADE7953
 #ifdef USE_CSE7761
   AGPIO(GPIO_CSE7761_TX),               // CSE7761 Serial interface (Dual R3)
-  AGPIO(GPIO_CSE7761_RX),               // CSE7761 Serial interface (Dual R3)
+  AGPIO(GPIO_CSE7761_RX) + MAX_CSE7761,  // CSE7761 Serial interface (1 = Dual R3, 2 = POWCT)
 #endif
 #ifdef USE_CSE7766
   AGPIO(GPIO_CSE7766_TX),               // CSE7766 Serial interface (S31 and Pow R2)
@@ -1093,6 +1096,9 @@ const uint16_t kGpioNiceList[] PROGMEM = {
 #ifdef USE_LORAWAN_ASR650X
   AGPIO(GPIO_ASR650X_TX),
   AGPIO(GPIO_ASR650X_RX),               // ASR650X LoRaWan node Serial interface
+#endif
+#ifdef USE_WOOLIIS                      // xsns_115_wooliis.ino
+  AGPIO(GPIO_WOOLIIS_RX),               // Wooliis Battery capacity monitor Serial interface
 #endif
 
 /*-------------------------------------------------------------------------------------------*\
