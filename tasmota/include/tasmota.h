@@ -80,7 +80,7 @@ const uint8_t MAX_DOMOTICZ_SNS_IDX = 12;    // Max number of Domoticz sensors in
 const uint8_t MAX_KNX_GA = 10;              // Max number of KNX Group Addresses to read that can be set
 const uint8_t MAX_KNX_CB = 10;              // Max number of KNX Group Addresses to write that can be set
 const uint8_t MAX_XNRG_DRIVERS = 32;        // Max number of allowed energy drivers
-const uint8_t MAX_XDRV_DRIVERS = 96;        // Max number of allowed driver drivers
+const uint8_t MAX_XDRV_DRIVERS = 128;       // Max number of allowed driver drivers
 const uint8_t MAX_XSNS_DRIVERS = 128;       // Max number of allowed sensor drivers
 const uint8_t MAX_I2C_DRIVERS = 96;         // Max number of allowed i2c drivers
 const uint8_t MAX_SHUTTERS = 4;             // Max number of shutters
@@ -282,11 +282,15 @@ const uint32_t LOOP_SLEEP_DELAY = 50;       // Lowest number of milliseconds to 
 #define KNX_SLOT3              28
 #define KNX_SLOT4              29
 #define KNX_SLOT5              30
-#define KNX_SCENE              31
-#define KNX_DIMMER             32   // aka DPT_Scaling 5.001
-#define KNX_COLOUR             33   // aka DPT_Colour_RGB 232.600 or DPT_Colour_RGBW 251.600
-#define KNX_MAX_device_param   33
-#define MAX_KNXTX_CMNDS        5
+#define KNX_SLOT6              31
+#define KNX_SLOT7              32
+#define KNX_SLOT8              33
+#define KNX_SLOT9              34
+#define KNX_SCENE              35
+#define KNX_DIMMER             36   // aka DPT_Scaling 5.001
+#define KNX_COLOUR             37   // aka DPT_Colour_RGB 232.600 or DPT_Colour_RGBW 251.600
+#define KNX_MAX_device_param   37
+#define MAX_KNXTX_CMNDS        9
 
 // XPT2046 resistive touch driver min/max raw values
 #define	XPT2046_MINX			192
