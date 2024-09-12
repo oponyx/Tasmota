@@ -122,15 +122,17 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 ## Changelog v14.2.0.4
 ### Added
 - Command ``SetOption69 1`` to enable Serial Bridge inverted Receive [#22000](https://github.com/arendst/Tasmota/issues/22000)
-- HX711 optional calibration precision option on command ``Sensor34 2 <weight in gram> <precision>`` where `<precision>` is 1 to 10 [#13983](https://github.com/arendst/Tasmota/issues/13983)
+- HX711 optional calibration precision option on command ``Sensor34 2 <weight in gram> <precision>`` where `<precision>` is 1 to 20 [#13983](https://github.com/arendst/Tasmota/issues/13983)
 - Energy command ``PowerSet 60,230`` to calibrate both Current and Power with known resistive load of 60W at 230V using calibrated Voltage
 - Energy command ``CurrentSet 60,230`` to calibrate both Power and Current with known resistive load of 60W at 230V using calibrated Voltage
 - Energy Log level 4 message when (Calculated) Apparent Power is less than Active Power indicating wrong calibration [#20653](https://github.com/arendst/Tasmota/issues/20653)
 - Support nexus protocol and calculation of separation limit to rc-switch library [#21886](https://github.com/arendst/Tasmota/issues/21886)
+- KNX additional KnxTx functions and define KNX_USE_DPT9 [#22071](https://github.com/arendst/Tasmota/issues/22071)
 - SML multi TRX line [#22056](https://github.com/arendst/Tasmota/issues/22056)
 - Zigbee Koenkk firmware 20240710 for Sonoff Zigbee ZBPro [#22076](https://github.com/arendst/Tasmota/issues/22076)
 - Berry Zigbee improvements to prepare Matter [#22083](https://github.com/arendst/Tasmota/issues/22083)
 - Matter support for Zigbee Temperature, Humidity and Pressure sensors [#22084](https://github.com/arendst/Tasmota/issues/22084)
+- Matter support for Zigbee Occupancy and Light 0/1/2 (OnOff / Dimmer / White Color Temperature) [#22110](https://github.com/arendst/Tasmota/issues/22110)
 
 ### Breaking Changed
 - Berry make `energy` modules changes from #21887 backwards compatible [#22046](https://github.com/arendst/Tasmota/issues/22046)
@@ -145,14 +147,19 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 ### Fixed
 - Crash when calling TasmotaSerial destructor when initialized with incorrect arguments [#22036](https://github.com/arendst/Tasmota/issues/22036)
 - Energy calculation [#20653](https://github.com/arendst/Tasmota/issues/20653)
+- SML trx pin error [#22119](https://github.com/arendst/Tasmota/issues/22119)
 - Shutter timing registers overflow [#21966](https://github.com/arendst/Tasmota/issues/21966)
 - Shutter missing HOLD on shutterbutton [#22108](https://github.com/arendst/Tasmota/issues/22108)
+- Shutter remaining issues on shutterinvert [#22120](https://github.com/arendst/Tasmota/issues/22120)
 - PZEM continue energy monitoring when one phase fails [#21968](https://github.com/arendst/Tasmota/issues/21968)
 - BearSSL panic on ESP8266 in rare conditions [#22017](https://github.com/arendst/Tasmota/issues/22017)
-- LVGL Added OpenHASP icons to font `montserrat-28` [#22048](https://github.com/arendst/Tasmota/issues/22048)
+- ModbusBridge request and response logic [#22075](https://github.com/arendst/Tasmota/issues/22075)
 - Zigbee extend timeout for MCU reboot from 5s to 10s [#22009](https://github.com/arendst/Tasmota/issues/22009)
 - Zigbee avoid disabling console serial on ESP32 and improved log messages [#22082](https://github.com/arendst/Tasmota/issues/22082)
+- Zigbee flashing CC2562P with latest firmware [#22117](https://github.com/arendst/Tasmota/issues/22117)
 - Berry avoid `readbytes()` from crashing when file is too large [#22057](https://github.com/arendst/Tasmota/issues/22057)
+- Berry energy missing attributes [#22116](https://github.com/arendst/Tasmota/issues/22116)
+- LVGL Added OpenHASP icons to font `montserrat-28` [#22048](https://github.com/arendst/Tasmota/issues/22048)
 - Matter fixed UI bug when no endpoints configured [#22008](https://github.com/arendst/Tasmota/issues/22008)
 - Matter fix when Rules are disabled [#22016](https://github.com/arendst/Tasmota/issues/22016)
 - Matter fail to report Shutter status if no shutter is configured in Tasmota [#22049](https://github.com/arendst/Tasmota/issues/22049)
