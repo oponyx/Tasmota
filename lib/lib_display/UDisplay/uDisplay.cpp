@@ -242,7 +242,7 @@ uDisplay::uDisplay(char *lp) : Renderer(800, 600) {
               if (wire_n == 1) {
                 wire = &Wire;
               } else {
-#ifdef ESP32               
+#if SOC_HP_I2C_NUM > 1
                 wire = &Wire1;
 #else
                 wire = &Wire;
@@ -599,6 +599,12 @@ uDisplay::uDisplay(char *lp) : Renderer(800, 600) {
           case 'B':
             lvgl_param.flushlines = next_val(&lp1);
             lvgl_param.data = next_val(&lp1);
+            // temporary fix to disable DMA due to a problem in esp-idf 5.3
+#ifdef ESP32
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
+            lvgl_param.use_dma = false;
+#endif
+#endif
             break;
           case 'M':
             rotmap_xmin = next_val(&lp1);
@@ -630,7 +636,7 @@ uDisplay::uDisplay(char *lp) : Renderer(800, 600) {
                 if (ut_mode == 1) {
                   ut_wire = &Wire;
                 } else {
-#ifdef ESP32
+#if SOC_HP_I2C_NUM > 1
                   ut_wire = &Wire1;
 #else
                   ut_wire = &Wire;
@@ -1070,7 +1076,7 @@ Renderer *uDisplay::Init(void) {
     if (wire_n == 0) {
       wire = &Wire;
     }
-#ifdef ESP32
+#if SOC_HP_I2C_NUM > 1
     if (wire_n == 1) {
       wire = &Wire1;
     }
@@ -2282,14 +2288,11 @@ void uDisplay::pushColors(uint16_t *data, uint16_t len, boolean not_swapped) {
           }
         }
         uint16_t * flush_ptr = rgb_fb + (int32_t)seta_yp1 * _width + seta_xp1;
-        esp_cache_msync(flush_ptr, (seta_xp2 - seta_xp1) * 2, 0);
+        Cache_WriteBack_Addr((uint32_t)flush_ptr, (seta_xp2 - seta_xp1) * 2);
         fb_y += _width;
         seta_yp1++;
         if (!lenc) break; 
       }
-      // using esp_cache_msync() to flush the PSRAM cache and ensure that all data is actually written to PSRAM
-      // from https://github.com/espressif/esp-idf/blob/636ff35b52f10e1a804a3760a5bd94e68f4b1b71/components/esp_lcd/rgb/esp_lcd_panel_rgb.c#L159
-
     }
 #endif
     return;
