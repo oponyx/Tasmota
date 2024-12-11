@@ -57,6 +57,7 @@
 #define D_AIR_QUALITY "Качество воздуха"
 #define D_AP "AP"                    // Access Point
 #define D_AS "как"
+#define D_AT "at"
 #define D_AUTO "АВТО"
 #define D_BATTERY "Battery"
 #define D_BATT "Batt"                // Short for Battery
@@ -216,6 +217,7 @@
 #define D_WEB_SERVER "Веб-сервер"
 #define D_SOC "State of Charge"
 #define D_SOH "State of Health"
+#define D_WATER_DEPTH "Глубина воды"
 
 // tasmota.ino
 #define D_WARNING_MINIMAL_VERSION "ПРЕДУПРЕЖДЕНИЕ Эта версия не поддерживает персистентные настройки"
@@ -573,8 +575,8 @@
 // xdrv_79_esp32_ble.ino
 #define D_CONFIGURE_BLE "Configure BLE"
 #define D_BLE_PARAMETERS "Bluetooth Settings"
-#define D_MQTT_BLE_ENABLE "Enable Bluetooth"
-#define D_MQTT_BLE_ACTIVESCAN "Enable Active Scan(*)"
+#define D_BLE_ENABLE "Enable Bluetooth"
+#define D_BLE_ACTIVESCAN "Enable Active Scan(*)"
 #define D_BLE_DEVICES "Devices Seen"
 #define D_BLE_REMARK "items marked (*) are not stored in config"
 
@@ -788,6 +790,8 @@
 #define D_SENSOR_TM1638_CLK    "TM1638 CLK"
 #define D_SENSOR_TM1638_DIO    "TM1638 DIO"
 #define D_SENSOR_TM1638_STB    "TM1638 STB"
+#define D_SENSOR_TM1640_CLK    "TM1640 CLK"
+#define D_SENSOR_TM1640_DIN    "TM1640 DIN"
 #define D_SENSOR_MAX7219_DIN    "MAX7219 DIN"
 #define D_SENSOR_MAX7219_CS    "MAX7219 CS"
 #define D_SENSOR_MAX7219_CLK    "MAX7219 CLK"

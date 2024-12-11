@@ -173,8 +173,6 @@
 
 #define FIRMWARE_MINIMAL
 
-#undef FIRMWARE_MINIMAL_ONLY
-
 #undef USE_ESP32_SENSORS
 #undef USE_UFILESYS
 #undef GUI_TRASH_FILE
@@ -190,14 +188,14 @@
 
 #undef USE_ESP32_WDT                                  // disable watchdog on SAFEBOOT until more testing is done
 
-#if CONFIG_IDF_TARGET_ESP32
-#if CONFIG_FREERTOS_UNICORE
-  #undef USE_MQTT_TLS
+#if CONFIG_FREERTOS_UNICORE || CONFIG_IDF_TARGET_ESP32S3
+#if CONFIG_ETH_ENABLED                               // Check for Ethernet support in Arduino libs
+//  #undef USE_MQTT_TLS
 //  #define USE_SERIAL_BRIDGE                        // Add support for software Serial Bridge console Tee (+4.5k code)
   #define USE_SPI                                    // Make SPI Ethernet adapters useable (+124 bytes)
   #define USE_ETHERNET
-#endif  // CONFIG_FREERTOS_UNICORE
-#endif  // CONFIG_IDF_TARGET_ESP32
+#endif  // CONFIG_ETH_ENABLED
+#endif  // CONFIG_FREERTOS_UNICORE || CONFIG_IDF_TARGET_ESP32S3
 
 #endif  // FIRMWARE_SAFEBOOT
 
@@ -450,6 +448,7 @@
 //#define USE_LUXV30B                            // [I2CDriver70] Enable RFRobot SEN0390 LuxV30b ambient light sensor (I2C address 0x4A) (+0k5 code)
 //#define USE_PMSA003I                           // [I2cDriver78] Enable PMSA003I Air Quality Sensor (I2C address 0x12) (+1k8 code)
 //#define USE_GDK101                             // [I2cDriver79] Enable GDK101 sensor (I2C addresses 0x18 - 0x1B) (+1k2 code)
+//#define USE_MS5837                             // [I2cDriver91] Enable MS5837 sensor (I2C address 0x76) (+2k7 code)
 
 //#define USE_RTC_CHIPS                          // Enable RTC chip support and NTP server - Select only one
 //  #define USE_DS3231                           // [I2cDriver26] Enable DS3231 RTC (I2C address 0x68) (+1k2 code)
@@ -692,6 +691,7 @@
 //#define USE_LUXV30B                            // [I2CDriver70] Enable RFRobot SEN0390 LuxV30b ambient light sensor (I2C address 0x4A) (+0k5 code)
 //#define USE_PMSA003I                           // [I2cDriver78] Enable PMSA003I Air Quality Sensor (I2C address 0x12) (+1k8 code)
 //#define USE_GDK101                             // [I2cDriver79] Enable GDK101 sensor (I2C addresses 0x18 - 0x1B) (+1k2 code)
+//#define USE_MS5837                             // [I2cDriver91] Enable MS5837 sensor (I2C address 0x76) (+2k7 code)
 
 //#define USE_RTC_CHIPS                          // Enable RTC chip support and NTP server - Select only one
 //  #define USE_DS3231                           // [I2cDriver26] Enable DS3231 RTC (I2C address 0x68) (+1k2 code)
@@ -832,12 +832,15 @@
 #endif // USE_MATTER_DEVICE
 
 /*********************************************************************************************\
- * Post-process compile options for esp32-c2
+ * Post-process for switched off Ethernet support in Arduino static libs
 \*********************************************************************************************/
 
-#ifdef CONFIG_IDF_TARGET_ESP32C2
+#ifndef CONFIG_ETH_ENABLED
   #undef USE_ETHERNET
-#endif  // CONFIG_IDF_TARGET_ESP32C2
+  #ifdef FIRMWARE_MINIMAL
+    #undef USE_SPI
+  #endif  // FIRMWARE_MINIMAL
+#endif  // CONFIG_ETH_ENABLED
 
 #endif  // ESP32
 #endif  // _TASMOTA_CONFIGURATIONS_ESP32_H_

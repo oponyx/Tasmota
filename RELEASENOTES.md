@@ -36,9 +36,9 @@ While fallback or downgrading is common practice it was never supported due to S
 
 This release will be supported from ESP8266/Arduino library Core version **2.7.8** due to reported security and stability issues on previous Core version. This will also support gzipped binaries.
 
-This release will be supported from ESP32/Arduino library Core version **v3.1.0.240926**.
+This release will be supported from ESP32/Arduino library Core version **v3.1.0.241206**.
 
-Support of ESP8266 Core versions before 2.7.8 and ESP32 Core versions before v3.1.0.240926 have been removed.
+Support of ESP8266 Core versions before 2.7.8 and ESP32 Core versions before v3.1.0.241206 have been removed.
 
 ## Support of TLS
 
@@ -75,12 +75,12 @@ Latest released binaries can be downloaded from
 - http://ota.tasmota.com/tasmota/release
 
 Historical binaries can be downloaded from
-- http://ota.tasmota.com/tasmota/release-14.3.0
+- http://ota.tasmota.com/tasmota/release-14.4.0
 
 The latter links can be used for OTA upgrades too like ``OtaUrl http://ota.tasmota.com/tasmota/release/tasmota.bin.gz``
 
 ### ESP32, ESP32-C2, ESP32-C3, ESP32-C6, ESP32-S2 and ESP32-S3 based
-The following binary downloads have been compiled with ESP32/Arduino library core version **v3.1.0.240926**.
+The following binary downloads have been compiled with ESP32/Arduino library core version **v3.1.0.241206**.
 
 - **tasmota32.bin** = The Tasmota version with most drivers including additional sensors and KNX for 4M+ flash.  **RECOMMENDED RELEASE BINARY**
 - **tasmota32solo1.bin** = The Tasmota version with most drivers including additional sensors and KNX for single core ESP32 and 4M+ flash.
@@ -104,7 +104,7 @@ Latest released binaries can be downloaded from
 - https://ota.tasmota.com/tasmota32/release
 
 Historical binaries can be downloaded from
-- https://ota.tasmota.com/tasmota32/release-14.3.0
+- https://ota.tasmota.com/tasmota32/release-14.4.0
 
 The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasmota.com/tasmota32/release/tasmota32.bin``
 
@@ -114,43 +114,13 @@ The latter links can be used for OTA upgrades too like ``OtaUrl https://ota.tasm
 
 [Complete list](BUILDS.md) of available feature and sensors.
 
-## Changelog v14.3.0.4
+## Changelog v14.4.0.1
 ### Added
-- Command ``SetOption161 1`` to disable web page slider updates by commands
-- DALI support for short addresses (gear) and groups
-- DALI command `DaliGear` to set max found gear to speed up scan response
-- DALI command `DaliGroup` to add gear to groups
-- DALI command `DaliTarget` to set light control broadcast, group number or gear number
-- DALI command `DaliGroupSliders 0..16` to show GUI group sliders with feedback disabling `DaliLight`
-- DALI inverted signal configuration using GPIO DALI RX_i/TX_i
-- Support for I2C over Serial, preliminary stub [#22388](https://github.com/arendst/Tasmota/issues/22388)
-- Support for Shelly DALI Dimmer Gen3
-- Support for HLK-LD2410S 24GHz smart wave motion sensor [#22253](https://github.com/arendst/Tasmota/issues/22253)
-- Support for US AQI and EPA AQI in PMS5003x sensors [#22294](https://github.com/arendst/Tasmota/issues/22294)
-- HLK-LD2410 Engineering mode [#21880](https://github.com/arendst/Tasmota/issues/21880)
-- Mitsubishi Electric HVAC Operation time for MiElHVAC [#22334](https://github.com/arendst/Tasmota/issues/22334)
-- Mitsubishi Electric HVAC Outdoor Temperature for MiElHVAC [#22345](https://github.com/arendst/Tasmota/issues/22345)
-- Mitsubishi Electric HVAC Compressor Frequency for MiElHVAC [#22347](https://github.com/arendst/Tasmota/issues/22347)
-- Mitsubishi Electric HVAC Auto Clear Remote Temp for MiElHVAC [#22370](https://github.com/arendst/Tasmota/issues/22370)
-- SolaxX1 Meter mode [#22330](https://github.com/arendst/Tasmota/issues/22330)
-- BLE track devices with RPA [#22300](https://github.com/arendst/Tasmota/issues/22300)
-- HASPmota `haspmota.get_pages()` to get the sorted list of pages [#22358](https://github.com/arendst/Tasmota/issues/22358)
 
 ### Breaking Changed
 
 ### Changed
-- ESP32 Platform from 2024.09.30 to 2024.11.30, Framework (Arduino Core) from v3.1.0.240926 to v3.1.0.241030 and IDF to 5.3.1.241024 [#22384](https://github.com/arendst/Tasmota/issues/22384)
-- ESP32 LVGL library from v9.2.0 to v9.2.2 [#22385](https://github.com/arendst/Tasmota/issues/22385)
-- Refactored `i2c_enabled` as array [#22387](https://github.com/arendst/Tasmota/issues/22387)
-- DALI renamed commands `DaliCommission` to `DaliScan` and `DaliWeb` to `DaliLight`
-- DALI set Tasmota light control as default
-- Shutter optimized behavior to publish shutter data with sensor request [#22353](https://github.com/arendst/Tasmota/issues/22353)
-- HASPmota support for page delete and object updates [#22311](https://github.com/arendst/Tasmota/issues/22311)
 
 ### Fixed
-- Alexa Hue with multiple devices [#22383](https://github.com/arendst/Tasmota/issues/22383)
-- EQ3 TRV firmware version 1.46 fails if the default true is used in subscribe on the notify characteristic [#22328](https://github.com/arendst/Tasmota/issues/22328)
-- Ethernet on -DFRAMEWORK_ARDUINO_ITEAD framework regression from v14.3.0 [#22367](https://github.com/arendst/Tasmota/issues/22367)
-- ESP32 Arduino Core IPv6 zones used by Matter [#22378](https://github.com/arendst/Tasmota/issues/22378)
 
 ### Removed

@@ -32,6 +32,7 @@
 
 // #define SOLAXX1_READCONFIG          // enable to read inverters config; disable to save codespace (3k1)
 
+#define SOLAXX1_BUFFERSIZE 256
 #define INVERTER_ADDRESS   0x0A
 
 #define D_SOLAX_X1         "SolaxX1"
@@ -100,6 +101,7 @@ union {
 struct SOLAXX1_LIVEDATA {
   int16_t temperature = 0;
   float energy_today = 0;
+  float energy_total = 0;
   float dc1_voltage = 0;
   float dc2_voltage = 0;
   float dc1_current = 0;
@@ -197,35 +199,21 @@ void solaxX1_RS485SendRaw(uint8_t *SendBuffer, uint8_t DataLen, uint8_t CRCflag)
 }
 
 bool solaxX1_RS485Receive(uint8_t *ReadBuffer) {
-  uint32_t SerWatchdogTime;
-
-  // Read header
+  uint8_t SerAvial;
   uint8_t len = 0;
-  SerWatchdogTime = millis();
-  while (len < 2) { // read exact length because of unaccurate timing of the inverter
-    if (solaxX1Serial->available()) ReadBuffer[len++] = (uint8_t)solaxX1Serial->read();
-    if (millis() > (SerWatchdogTime + 1000)) return true; // No data received -> bail out
+
+  while (SerAvial = solaxX1Serial->available()) {
+    while (SerAvial--) {
+      ReadBuffer[len++] = (uint8_t)solaxX1Serial->read();
+    }
+    delay(10);  // wait for more data because of slowness of the inverter
   }
+  AddLogBuffer(LOG_LEVEL_DEBUG_MORE, ReadBuffer, len);
 
   // Check and set meter mode
   solaxX1_SwitchMeterMode((ReadBuffer[0] == 0x01 || ReadBuffer[0] == 0x02) && (ReadBuffer[1] == 0x03 || ReadBuffer[1] == 0x04));
+  if (solaxX1_global.MeterMode) return false; // Ignore checksum in metermode
 
-  // Read data in meter mode
-  if (solaxX1_global.MeterMode) { // Metermode
-    SerWatchdogTime = millis();
-    while (len < 8) { // read exact length because of unaccurate timing of the inverter
-      if (solaxX1Serial->available()) ReadBuffer[len++] = (uint8_t)solaxX1Serial->read();
-      if (millis() > (SerWatchdogTime + 1000)) return true; // No data received -> bail out
-    }
-    AddLogBuffer(LOG_LEVEL_DEBUG_MORE, ReadBuffer, len);
-    return false; // Ignore checksum  
-  } // end Metermode
-
-  // Process normal receive
-  while (solaxX1Serial->available()) {
-    ReadBuffer[len++] = (uint8_t)solaxX1Serial->read();
-  }
-  AddLogBuffer(LOG_LEVEL_DEBUG_MORE, ReadBuffer, len);
   uint16_t crc = solaxX1_calculateCRC(ReadBuffer, len - 2); // calculate out crc bytes
   return !(ReadBuffer[len - 1] == lowByte(crc) && ReadBuffer[len - 2] == highByte(crc));
 }
@@ -343,7 +331,7 @@ void solaxX1_SwitchMeterMode(bool MeterMode) {
 /*********************************************************************************************/
 
 void solaxX1_CyclicTask(void) { // Every 100/250 milliseconds
-  uint8_t DataRead[80] = {0};
+  uint8_t DataRead[SOLAXX1_BUFFERSIZE] = {0};
   uint8_t TempData[16] = {0};
   char TempDataChar[32];
   float TempFloat;
@@ -413,7 +401,7 @@ void solaxX1_CyclicTask(void) { // Every 100/250 milliseconds
       Energy->frequency[0] =    ((DataRead[25] << 8) | DataRead[26]) * 0.01f; // AC Frequency
       Energy->active_power[0] = ((DataRead[27] << 8) | DataRead[28]); // AC Power
       //temporal = (float)((DataRead[29] << 8) | DataRead[30]) * 0.1f; // Not Used
-      Energy->import_active[0] = ((DataRead[31] << 24) | (DataRead[32] << 16) | (DataRead[33] << 8) | DataRead[34]) * 0.1f; // Energy Total
+      solaxX1.energy_total =     ((DataRead[31] << 24) | (DataRead[32] << 16) | (DataRead[33] << 8) | DataRead[34]) * 0.1f; // Energy Total
       uint32_t runtime_total = (DataRead[35] << 24) | (DataRead[36] << 16) | (DataRead[37] << 8) | DataRead[38]; // Work Time Total
       if (runtime_total) solaxX1.runtime_total = runtime_total; // Work Time valid
       solaxX1.runMode =        (DataRead[39] << 8) | DataRead[40]; // Work mode
@@ -427,7 +415,10 @@ void solaxX1_CyclicTask(void) { // Every 100/250 milliseconds
       solaxX1.errorCode =      (DataRead[58] << 24) | (DataRead[57] << 16) | (DataRead[56] << 8) | DataRead[55]; // Error Code
       solaxX1.dc1_power = solaxX1.dc1_voltage * solaxX1.dc1_current;
       solaxX1.dc2_power = solaxX1.dc2_voltage * solaxX1.dc2_current;
-      EnergyUpdateTotal();  // 484.708 kWh
+      if (Settings->flag3.hardware_energy_total) {   // SetOption72 - Enable hardware energy total counter as reference (#6561)
+        Energy->import_active[0] = solaxX1.energy_total;
+        EnergyUpdateTotal();  // 484.708 kWh
+      }
       DEBUG_SENSOR_LOG(PSTR("SX1: received live data"));
       return;
     } // end received "Response for query (live data)"
@@ -550,7 +541,7 @@ void solaxX1_CyclicTask(void) { // Every 100/250 milliseconds
 //  DEBUG_SENSOR_LOG(PSTR("SX1: solaxX1_global.AddressAssigned: %d, solaxX1_global.QueryData_count: %d, solaxX1_global.SendRetry_count: %d"), solaxX1_global.AddressAssigned, solaxX1_global.QueryData_count, solaxX1_global.SendRetry_count);
   if (solaxX1_global.AddressAssigned) {
     if (!solaxX1_global.QueryData_count) { // normal periodically query
-      solaxX1_global.QueryData_count = 5;
+      solaxX1_global.QueryData_count = 3;
       if (!solaxX1.SerialNumber[0] || solaxX1_global.Command_QueryID) { // ID query
         DEBUG_SENSOR_LOG(PSTR("SX1: Send ID query"));
         solaxX1_QueryIDData();
@@ -583,9 +574,16 @@ void solaxX1_CyclicTask(void) { // Every 100/250 milliseconds
 return;  
 } // end solaxX1_CyclicTask
 
+void solaxX1_EverySecond(void) {
+  if (Settings->flag3.hardware_energy_total) return;   // SetOption72 - Enable hardware energy total counter as reference (#6561)
+  if (Energy->data_valid[0]) return;
+  Energy->kWhtoday_delta[0] += Energy->active_power[0] * 1000 / 36;
+  EnergyUpdateToday();
+} // end solaxX1_EverySecond
+
 void solaxX1_SnsInit(void) {
   AddLog(LOG_LEVEL_INFO, PSTR("SX1: Init - RX-pin: %d, TX-pin: %d, RTS-pin: %d"), Pin(GPIO_SOLAXX1_RX), Pin(GPIO_SOLAXX1_TX), Pin(GPIO_SOLAXX1_RTS));
-  solaxX1Serial = new TasmotaSerial(Pin(GPIO_SOLAXX1_RX), Pin(GPIO_SOLAXX1_TX), 1);
+  solaxX1Serial = new TasmotaSerial(Pin(GPIO_SOLAXX1_RX), Pin(GPIO_SOLAXX1_TX), 1, 1, SOLAXX1_BUFFERSIZE);
   if (solaxX1Serial->begin(SOLAXX1_SPEED)) {
     if (solaxX1Serial->hardwareSerial()) { ClaimSerial(); }
 #ifdef ESP32
@@ -669,6 +667,10 @@ void solaxX1_Show(uint32_t function) {
   char pv2_power[33];
   dtostrfd(solaxX1.dc2_power, Settings->flag2.wattage_resolution, pv2_power);
 #endif
+  char inverter_today[33];
+  dtostrfd(solaxX1.energy_today, Settings->flag2.energy_resolution, inverter_today);
+  char inverter_total[33];
+  dtostrfd(solaxX1.energy_total, Settings->flag2.energy_resolution, inverter_total);
   char status[33];
   GetTextIndexed(status, sizeof(status), solaxX1.runMode + 2, kSolaxMode);
 
@@ -716,6 +718,10 @@ void solaxX1_Show(uint32_t function) {
         WSContentSend_PD(HTTP_SNS_solaxX1_Num, D_PV2_CURRENT, table_align.c_str(), pv2_current, D_UNIT_AMPERE);
         WSContentSend_PD(HTTP_SNS_solaxX1_Num, D_PV2_POWER,   table_align.c_str(), pv2_power,   D_UNIT_WATT);
 #endif
+        if (!Settings->flag3.hardware_energy_total) {   // SetOption72 - Enable hardware energy total counter as reference (#6561)
+          WSContentSend_PD(HTTP_SNS_solaxX1_Num, D_ENERGY_TODAY, table_align.c_str(), inverter_today, D_UNIT_KILOWATTHOUR);
+          WSContentSend_PD(HTTP_SNS_solaxX1_Num, D_ENERGY_TOTAL, table_align.c_str(), inverter_total, D_UNIT_KILOWATTHOUR);
+        }
         char SXTemperature[16];
         dtostrfd(solaxX1.temperature, Settings->flag2.temperature_resolution, SXTemperature);
         WSContentSend_PD(HTTP_SNS_solaxX1_Num, D_TEMPERATURE, table_align.c_str(), SXTemperature, D_UNIT_DEGREE D_UNIT_CELSIUS);
@@ -746,6 +752,9 @@ bool Xnrg12(uint32_t function) {
       break;
     case FUNC_EVERY_250_MSECOND:
       if (!solaxX1_global.MeterMode) solaxX1_CyclicTask();
+      break;
+    case FUNC_EVERY_SECOND:
+      solaxX1_EverySecond();
       break;
 #ifdef USE_WEBSERVER
     case FUNC_WEB_COL_SENSOR:

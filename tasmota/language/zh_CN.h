@@ -56,6 +56,7 @@
 #define D_AIR_QUALITY "空气质量"
 #define D_AP "AP"                    // Access Point
 #define D_AS "名称:"
+#define D_AT "at"
 #define D_AUTO "自动"
 #define D_BATTERY "Battery"
 #define D_BATT "Batt"                // Short for Battery
@@ -215,6 +216,7 @@
 #define D_WEB_SERVER "Web服务器"
 #define D_SOC "充电状态"
 #define D_SOH "充电健康"
+#define D_WATER_DEPTH "水深"
 
 // tasmota.ino
 #define D_WARNING_MINIMAL_VERSION "警告：精简固件不支持持久保存设置"
@@ -572,8 +574,8 @@
 // xdrv_79_esp32_ble.ino
 #define D_CONFIGURE_BLE "Configure BLE"
 #define D_BLE_PARAMETERS "Bluetooth Settings"
-#define D_MQTT_BLE_ENABLE "Enable Bluetooth"
-#define D_MQTT_BLE_ACTIVESCAN "Enable Active Scan(*)"
+#define D_BLE_ENABLE "Enable Bluetooth"
+#define D_BLE_ACTIVESCAN "Enable Active Scan(*)"
 #define D_BLE_DEVICES "Devices Seen"
 #define D_BLE_REMARK "items marked (*) are not stored in config"
 
@@ -787,6 +789,8 @@
 #define D_SENSOR_TM1638_CLK    "TM1638 CLK"
 #define D_SENSOR_TM1638_DIO    "TM1638 DIO"
 #define D_SENSOR_TM1638_STB    "TM1638 STB"
+#define D_SENSOR_TM1640_CLK    "TM1640 CLK"
+#define D_SENSOR_TM1640_DIN    "TM1640 DIN"
 #define D_SENSOR_MAX7219_DIN    "MAX7219 DIN"
 #define D_SENSOR_MAX7219_CS    "MAX7219 CS"
 #define D_SENSOR_MAX7219_CLK    "MAX7219 CLK"
@@ -1059,7 +1063,7 @@
 #define D_UNIT_SECOND "秒"
 #define D_UNIT_SECTORS "扇区"
 #define D_UNIT_VA "VA"
-#define D_UNIT_VAR "VAr"
+#define D_UNIT_VAR "var"
 #define D_UNIT_VOLT "V"
 #define D_UNIT_WATT "W"
 #define D_UNIT_WATTHOUR "Wh"

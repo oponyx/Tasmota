@@ -28,7 +28,7 @@
  * Use online command StateText to translate ON, OFF, HOLD and TOGGLE.
  * Use online command Prefix to translate cmnd, stat and tele.
  *
- * Updated until v9.4.0.1 - Last update 31.10.2024
+ * Updated until v9.4.0.1 - Last update 07.12.2024
 \*********************************************************************/
 
 #define LANGUAGE_MODULE_NAME         // Enable to display "Module Generic" (ie Spanish), Disable to display "Generic Module" (ie English)
@@ -56,6 +56,7 @@
 #define D_AIR_QUALITY          "Qualità dell'aria"
 #define D_AP                   "AP"                   // Access Point
 #define D_AS                   "come"
+#define D_AT                   "in"
 #define D_AUTO                 "AUTO"
 #define D_BATTERY              "Batteria"
 #define D_BATT                 "Batt"                 // Short for Battery
@@ -215,6 +216,7 @@
 #define D_WEB_SERVER           "Server web"
 #define D_SOC                  "Stato di carica"
 #define D_SOH                  "State di salute"
+#define D_WATER_DEPTH          "Profondità dell'acqua"
 
 // tasmota.ino
 #define D_WARNING_MINIMAL_VERSION  "ATTENZIONE Questa versione non supporta il salvataggio delle impostazioni"
@@ -385,10 +387,10 @@
 #define D_FLASH_CHIP_SIZE       "Dimensione flash"
 #define D_FREE_PROGRAM_SPACE    "Memoria libera programma"
 
-#define D_UPGRADE_BY_WEBSERVER    "Aggiornamento via server web"
+#define D_UPGRADE_BY_WEBSERVER    "Aggiorna via server web"
 #define D_OTA_URL                 "URL OTA"
 #define D_START_UPGRADE           "Esegui aggiornamento"
-#define D_UPGRADE_BY_FILE_UPLOAD  "Aggiornamento tramite file locale"
+#define D_UPGRADE_BY_FILE_UPLOAD  "Aggiorna tramite file locale"
 #define D_UPLOAD_FACTORY          "Passaggio a partizione avvio sicuro"
 #define D_UPLOAD_STARTED          "Caricamento..."
 #define D_UPGRADE_STARTED         "Aggiornamento..."
@@ -570,10 +572,10 @@
 #define D_THERMOSTAT_AUTOTUNE_HYBRID  "Regolazione automatica (ibrida)"
 
 // xdrv_79_esp32_ble.ino
-#define D_CONFIGURE_BLE               "Configura BLE"
+#define D_CONFIGURE_BLE               "BLE"
 #define D_BLE_PARAMETERS              "Impostazioni Bluetooth"
-#define D_MQTT_BLE_ENABLE             "Abilita Bluetooth"
-#define D_MQTT_BLE_ACTIVESCAN         "Abilita scansione attiva (*)"
+#define D_BLE_ENABLE                  "Abilita Bluetooth"
+#define D_BLE_ACTIVESCAN              "Abilita scansione attiva (*)"
 #define D_BLE_DEVICES                 "Scansione dispositivi"
 #define D_BLE_REMARK                  "gli elementi segnati con (*) non sono memorizzati in config"
 
@@ -787,6 +789,8 @@
 #define D_SENSOR_TM1638_CLK             "TM1638 - CLK"
 #define D_SENSOR_TM1638_DIO             "TM1638 - DIO"
 #define D_SENSOR_TM1638_STB             "TM1638 - STB"
+#define D_SENSOR_TM1640_CLK             "TM1640 - CLK"
+#define D_SENSOR_TM1640_DIN             "TM1640 - DIN"
 #define D_SENSOR_MAX7219_DIN            "MAX7219 - DIN"
 #define D_SENSOR_MAX7219_CS             "MAX7219 - CS"
 #define D_SENSOR_MAX7219_CLK            "MAX7219 - CLK"
@@ -1059,7 +1063,7 @@
 #define D_UNIT_SECOND                     "sec"
 #define D_UNIT_SECTORS                    "settori"
 #define D_UNIT_VA                         "VA"
-#define D_UNIT_VAR                        "VAr"
+#define D_UNIT_VAR                        "var"
 #define D_UNIT_VOLT                       "V"
 #define D_UNIT_WATT                       "W"
 #define D_UNIT_WATTHOUR                   "Wh"
@@ -1081,7 +1085,7 @@
 #define D_IMPORT_REACTIVE          "Potenza reattiva importata"
 #define D_EXPORT_REACTIVE          "Potenza reattiva esportata"
 #define D_TOTAL_REACTIVE           "Potenza reattiva totale"
-#define D_UNIT_KWARH               "kVArh"
+#define D_UNIT_KWARH               "kvarh"
 #define D_UNIT_ANGLE               "°"
 #define D_TOTAL_ACTIVE             "Potenza attiva totale"
 #define D_RESETTABLE_TOTAL_ACTIVE  "Potenza attiva totale (RST)"
